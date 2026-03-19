@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Monte o Algoritmo</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      margin: 0;
+      padding: 20px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    header h1 { margin: 5px; }
+    header p { margin: 2px; font-weight: bold; }
+
+    #pontuacao {
+      margin-top: 5px;
+      font-size: 18px;
+      color: #333;
+    }
+
+    .container {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .box {
+      background: white;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      width: 300px;
+      min-height: 300px;
+    }
+
+    .box h2 { text-align: center; }
+
+    .item {
+      background: #4CAF50;
+      color: white;
+      padding: 10px;
+      margin: 5px 0;
+      border-radius: 5px;
+      cursor: grab;
+      text-align: center;
+    }
+
+    .dropzone {
+      border: 2px dashed #ccc;
+      min-height: 200px;
+      padding: 10px;
+    }
+
+    button {
+      margin: 10px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      background: #007BFF;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .controls { text-align: center; }
+
+    #resultado {
+      text-align: center;
+      font-size: 18px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Monte o Algoritmo</h1>
+  <p>IFFar - Programação I</p>
+  <p>Professor Cristhiano Vasconcellos</p>
+  <div id="pontuacao">Pontuação: 0</div>
+</header>
+
+<p style="text-align:center" id="enunciado"></p>
+
+<div class="container">
+  <div class="box">
+    <h2>Blocos</h2>
+    <div id="blocos"></div>
+  </div>
+
+  <div class="box">
+    <h2>Seu Algoritmo</h2>
+    <div id="dropzone" class="dropzone"></div>
+  </div>
+</div>
+
+<div class="controls">
+  <button onclick="verificar()">Verificar</button>
+  <button onclick="proximo()">Próximo</button>
+  <button onclick="reiniciar()">Reiniciar</button>
+</div>
+
+<div id="resultado"></div>
+
+<script>
+  const desafios = [
+    { enunciado: 'Peça um número e diga se é maior que 10', blocos: ['leia numero','se numero > 10 então','escreva "Maior que 10"','fimse'], resposta: ['leia numero','se numero > 10 então','escreva "Maior que 10"','fimse'] },
+    { enunciado: 'Peça um número e diga se é par', blocos: ['leia numero','se numero % 2 == 0 então','escreva "Par"','fimse'], resposta: ['leia numero','se numero % 2 == 0 então','escreva "Par"','fimse'] },
+    { enunciado: 'Peça um número e diga se é positivo', blocos: ['leia numero','se numero > 0 então','escreva "Positivo"','fimse'], resposta: ['leia numero','se numero > 0 então','escreva "Positivo"','fimse'] },
+    { enunciado: 'Peça dois números e mostre a soma', blocos: ['leia a','leia b','soma = a + b','escreva soma'], resposta: ['leia a','leia b','soma = a + b','escreva soma'] },
+    { enunciado: 'Peça um número e diga se é menor que 0', blocos: ['leia numero','se numero < 0 então','escreva "Negativo"','fimse'], resposta: ['leia numero','se numero < 0 então','escreva "Negativo"','fimse'] },
+    { enunciado: 'Peça um número e mostre o dobro', blocos: ['leia numero','dobro = numero * 2','escreva dobro'], resposta: ['leia numero','dobro = numero * 2','escreva dobro'] },
+    { enunciado: 'Peça um número e diga se é igual a 5', blocos: ['leia numero','se numero == 5 então','escreva "Igual a 5"','fimse'], resposta: ['leia numero','se numero == 5 então','escreva "Igual a 5"','fimse'] },
+    { enunciado: 'Peça um número e mostre seu quadrado', blocos: ['leia numero','quadrado = numero * numero','escreva quadrado'], resposta: ['leia numero','quadrado = numero * numero','escreva quadrado'] },
+    { enunciado: 'Peça dois números e mostre o maior', blocos: ['leia a','leia b','se a > b então','escreva a','fimse'], resposta: ['leia a','leia b','se a > b então','escreva a','fimse'] },
+    { enunciado: 'Peça um número e diga se é diferente de 0', blocos: ['leia numero','se numero != 0 então','escreva "Diferente de zero"','fimse'], resposta: ['leia numero','se numero != 0 então','escreva "Diferente de zero"','fimse'] }
+  ];
+
+  let atual = 0;
+  let dragged = null;
+  let pontos = 0;
+  let acertou = false;
+
+  function atualizarPontuacao() {
+    document.getElementById('pontuacao').innerText = 'Pontuação: ' + pontos;
+  }
+
+  function embaralhar(array) {
+    return array.sort(() => Math.random() - 0.5);
+  }
+
+  function carregar() {
+    const desafio = desafios[atual];
+    document.getElementById('enunciado').innerText = desafio.enunciado;
+
+    const blocosDiv = document.getElementById('blocos');
+    const dropzone = document.getElementById('dropzone');
+
+    blocosDiv.innerHTML = '';
+    dropzone.innerHTML = '';
+    document.getElementById('resultado').innerHTML = '';
+
+    acertou = false;
+
+    embaralhar([...desafio.blocos]).forEach(texto => {
+      const div = document.createElement('div');
+      div.className = 'item';
+      div.draggable = true;
+      div.innerText = texto;
+
+      div.addEventListener('dragstart', () => dragged = div);
+
+      blocosDiv.appendChild(div);
+    });
+  }
+
+  document.getElementById('dropzone').addEventListener('dragover', e => e.preventDefault());
+
+  document.getElementById('dropzone').addEventListener('drop', () => {
+    if (dragged) {
+      const clone = dragged.cloneNode(true);
+      clone.addEventListener('dragstart', () => dragged = clone);
+      document.getElementById('dropzone').appendChild(clone);
+    }
+  });
+
+  function verificar() {
+    const respostaUsuario = Array.from(document.getElementById('dropzone').children).map(e => e.innerText);
+    const correta = desafios[atual].resposta;
+
+    const resultado = document.getElementById('resultado');
+
+    if (JSON.stringify(respostaUsuario) === JSON.stringify(correta)) {
+      resultado.innerHTML = '✅ Correto!';
+      resultado.style.color = 'green';
+
+      if (!acertou) {
+        pontos++;
+        atualizarPontuacao();
+        acertou = true;
+      }
+
+    } else {
+      resultado.innerHTML = '❌ Tente novamente!';
+      resultado.style.color = 'red';
+    }
+  }
+
+  function proximo() {
+    atual = (atual + 1) % desafios.length;
+    carregar();
+  }
+
+  function reiniciar() {
+    pontos = 0;
+    atualizarPontuacao();
+    atual = 0;
+    carregar();
+  }
+
+  atualizarPontuacao();
+  carregar();
+</script>
+
+</body>
+</html>
