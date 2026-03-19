@@ -261,42 +261,49 @@ inicio</pre>
 
   <script>
     (function() {
-      // ========== CONFIGURAÇÃO DOS NÍVEIS ==========
+      // ========== CONFIGURAÇÃO DOS NÍVEIS (DIFICULDADE PROGRESSIVA) ==========
       const niveis = [
-        { // Nível 1 - fácil
+        { // Nível 1 - sem obstáculos (caminho livre)
           nome: "Nível 1",
           robot: { x: 0, y: 0 },
           direcao: 'right',
           goal: { x: 4, y: 4 },
           obstacles: []
         },
-        { // Nível 2 - com obstáculo simples
+        { // Nível 2 - obstáculo imediato na frente (exige virar primeiro)
           nome: "Nível 2",
           robot: { x: 0, y: 0 },
           direcao: 'right',
           goal: { x: 4, y: 4 },
-          obstacles: [{ x: 2, y: 2 }]
+          obstacles: [{ x: 1, y: 0 }]
         },
-        { // Nível 3 - dois obstáculos
+        { // Nível 3 - dois obstáculos: um no início e outro perto do objetivo
           nome: "Nível 3",
           robot: { x: 0, y: 0 },
           direcao: 'right',
           goal: { x: 4, y: 4 },
-          obstacles: [{ x: 2, y: 2 }, { x: 3, y: 1 }]
+          obstacles: [{ x: 1, y: 0 }, { x: 2, y: 4 }]
         },
-        { // Nível 4 - mais obstáculos
+        { // Nível 4 - três obstáculos forçando um desvio mais longo
           nome: "Nível 4",
           robot: { x: 0, y: 0 },
           direcao: 'right',
           goal: { x: 4, y: 4 },
-          obstacles: [{ x: 1, y: 1 }, { x: 2, y: 2 }, { x: 3, y: 3 }]
+          obstacles: [{ x: 1, y: 0 }, { x: 2, y: 4 }, { x: 3, y: 2 }]
         },
-        { // Nível 5 - obstáculos em caminho
+        { // Nível 5 - labirinto com caminho único (apenas uma rota possível)
           nome: "Nível 5",
           robot: { x: 0, y: 0 },
           direcao: 'right',
           goal: { x: 4, y: 4 },
-          obstacles: [{ x: 2, y: 0 }, { x: 2, y: 1 }, { x: 2, y: 2 }, { x: 1, y: 3 }]
+          obstacles: [
+            // Todos os blocos que não fazem parte do caminho planejado:
+            { x: 0, y: 3 }, { x: 0, y: 4 },
+            { x: 1, y: 0 }, { x: 1, y: 1 }, { x: 1, y: 4 },
+            { x: 2, y: 0 }, { x: 2, y: 1 }, { x: 2, y: 2 },
+            { x: 3, y: 0 }, { x: 3, y: 1 }, { x: 3, y: 2 }, { x: 3, y: 3 },
+            { x: 4, y: 0 }, { x: 4, y: 1 }, { x: 4, y: 2 }, { x: 4, y: 3 }
+          ]
         }
       ];
 
