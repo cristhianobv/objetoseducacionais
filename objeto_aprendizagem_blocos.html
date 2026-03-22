@@ -45,6 +45,20 @@
       border: 1px solid rgba(34, 197, 94, 0.3);
     }
 
+    /* Orientação no topo */
+    .orientacao {
+      text-align: center;
+      background: #111827;
+      padding: 10px;
+      margin: 0 auto;
+      font-size: 0.9rem;
+      color: #22c55e;
+      border-bottom: 1px solid rgba(34, 197, 94, 0.3);
+    }
+    .orientacao i {
+      margin-right: 8px;
+    }
+
     .container {
       flex: 1;
       display: flex;
@@ -73,7 +87,6 @@
       color: #22c55e;
     }
 
-    /* Blocos (itens arrastáveis) */
     .bloco {
       background: #22c55e;
       color: #000;
@@ -91,7 +104,6 @@
       cursor: grabbing;
     }
 
-    /* Área de destino (dropzone) – garante empilhamento vertical */
     .dropzone {
       min-height: 300px;
       background: rgba(0, 0, 0, 0.2);
@@ -99,7 +111,7 @@
       padding: 12px;
       border: 2px dashed rgba(34, 197, 94, 0.5);
       transition: background 0.2s;
-      display: block;        /* importante: não usar flex */
+      display: block;
     }
     .dropzone .bloco {
       cursor: default;
@@ -111,7 +123,6 @@
       cursor: default;
     }
 
-    /* Área dos blocos originais também com empilhamento vertical */
     #blocos-origem {
       display: block;
     }
@@ -180,6 +191,11 @@
   <div class="pontuacao" id="pontuacao">Pontuação: 0</div>
 </header>
 
+<!-- Orientação no topo -->
+<div class="orientacao">
+  <i class="fas fa-arrows-alt"></i> Arraste os blocos para a área da direita na ordem correta
+</div>
+
 <div class="enunciado" id="enunciado"></div>
 
 <div class="container">
@@ -196,11 +212,13 @@
 <div class="controles">
   <button id="verificarBtn">✅ Verificar</button>
   <button id="proximoBtn">⏩ Próximo</button>
-  <button id="reiniciarBtn">🔄 Reiniciar</button>
+  <button id="reiniciarBtn">🔄 Reiniciar Desafio</button>
   <button id="finalizarBtn" style="background:#dc3545; box-shadow:0 2px 0 #b91c1c;">📥 Finalizar e Registrar</button>
 </div>
 <div id="feedback" class="feedback"></div>
-<footer>Arraste os blocos para a área da direita na ordem correta</footer>
+<footer>
+  <span><i class="fas fa-graduation-cap"></i> IFFar - Programação I | Todos os objetos são interativos e registram seu progresso</span>
+</footer>
 
 <script>
   // ---------- DADOS DOS DESAFIOS ----------
@@ -209,7 +227,7 @@
     { enunciado: 'Peça um número e diga se é par', blocos: ['leia numero','se numero % 2 == 0 então','escreva "Par"','fimse'], resposta: ['leia numero','se numero % 2 == 0 então','escreva "Par"','fimse'] },
     { enunciado: 'Peça um número e diga se é positivo', blocos: ['leia numero','se numero > 0 então','escreva "Positivo"','fimse'], resposta: ['leia numero','se numero > 0 então','escreva "Positivo"','fimse'] },
     { enunciado: 'Peça dois números e mostre a soma', blocos: ['leia a','leia b','soma = a + b','escreva soma'], resposta: ['leia a','leia b','soma = a + b','escreva soma'] },
-    { enunciado: 'Peça um número e diga se é negativo', blocos: ['leia numero','se numero < 0 então','escreva "Negativo"','fimse'], resposta: ['leia numero','se numero < 0 então','escreva "Negativo"','fimse'] },
+    { enunciado: 'Peça um número e diga se é menor que 0', blocos: ['leia numero','se numero < 0 então','escreva "Negativo"','fimse'], resposta: ['leia numero','se numero < 0 então','escreva "Negativo"','fimse'] },
     { enunciado: 'Peça um número e mostre o dobro', blocos: ['leia numero','dobro = numero * 2','escreva dobro'], resposta: ['leia numero','dobro = numero * 2','escreva dobro'] },
     { enunciado: 'Peça um número e diga se é igual a 5', blocos: ['leia numero','se numero == 5 então','escreva "Igual a 5"','fimse'], resposta: ['leia numero','se numero == 5 então','escreva "Igual a 5"','fimse'] },
     { enunciado: 'Peça um número e mostre seu quadrado', blocos: ['leia numero','quadrado = numero * numero','escreva quadrado'], resposta: ['leia numero','quadrado = numero * numero','escreva quadrado'] },
@@ -221,6 +239,7 @@
   let pontos = 0;
   let acertou = false;
   let dragged = null;
+  let finalizado = false;
 
   const URL_WEBAPP = "https://script.google.com/macros/s/AKfycbzoeygTm-R27yb8QOcdH0s7fViv6vGPQ5MtDuCgHBt3RhvFVQKlGxf3A7yQUR3RfRqFcw/exec";
   const NOME_ATIVIDADE = "Monte os Blocos";
@@ -264,7 +283,6 @@
     return array;
   }
 
-  // Cria um bloco arrastável
   function criarBloco(texto, isOrigem = true) {
     const div = document.createElement('div');
     div.className = 'bloco';
@@ -272,6 +290,10 @@
     if (isOrigem) {
       div.draggable = true;
       div.addEventListener('dragstart', (e) => {
+        if (finalizado) {
+          e.preventDefault();
+          return false;
+        }
         dragged = div;
         e.dataTransfer.setData('text/plain', texto);
       });
@@ -281,9 +303,27 @@
     return div;
   }
 
-  // Recarrega a questão atual
-  function carregar() {
+  function reiniciarDesafio() {
+    if (finalizado) return;
     const desafio = desafios[atual];
+    const origemDiv = document.getElementById('blocos-origem');
+    const dropDiv = document.getElementById('dropzone');
+
+    origemDiv.innerHTML = '';
+    dropDiv.innerHTML = '';
+
+    const blocosEmbaralhados = embaralhar([...desafio.blocos]);
+    blocosEmbaralhados.forEach(texto => {
+      origemDiv.appendChild(criarBloco(texto, true));
+    });
+
+    acertou = false;
+    document.getElementById('feedback').innerHTML = '';
+  }
+
+  function carregarDesafio(indice) {
+    if (finalizado) return;
+    const desafio = desafios[indice];
     document.getElementById('enunciado').innerText = desafio.enunciado;
 
     const origemDiv = document.getElementById('blocos-origem');
@@ -292,34 +332,27 @@
     origemDiv.innerHTML = '';
     dropDiv.innerHTML = '';
 
-    acertou = false;
-    document.getElementById('feedback').innerHTML = '';
-
-    // Embaralha os blocos da origem e adiciona
     const blocosEmbaralhados = embaralhar([...desafio.blocos]);
     blocosEmbaralhados.forEach(texto => {
       origemDiv.appendChild(criarBloco(texto, true));
     });
+
+    acertou = false;
+    document.getElementById('feedback').innerHTML = '';
   }
 
-  // Eventos de drag and drop na dropzone
-  const dropzone = document.getElementById('dropzone');
-  dropzone.addEventListener('dragover', (e) => {
-    e.preventDefault();
-  });
-  dropzone.addEventListener('drop', (e) => {
-    e.preventDefault();
-    if (dragged) {
-      const clone = criarBloco(dragged.innerText, false);
-      dropzone.appendChild(clone);
-      // Remove o bloco original da origem
-      dragged.remove();
-      dragged = null;
+  function proximoDesafio() {
+    if (finalizado) return;
+    if (atual + 1 < desafios.length) {
+      atual++;
+      carregarDesafio(atual);
+    } else {
+      finalizarAtividade();
     }
-  });
+  }
 
-  // Verifica a ordem dos blocos na dropzone
   function verificar() {
+    if (finalizado) return;
     const dropDiv = document.getElementById('dropzone');
     const respostaUsuario = Array.from(dropDiv.children).map(el => el.innerText);
     const correta = desafios[atual].resposta;
@@ -337,32 +370,50 @@
     }
   }
 
-  function proximo() {
-    atual = (atual + 1) % desafios.length;
-    carregar();
-  }
-
-  function reiniciar() {
-    pontos = 0;
-    atualizarPontuacao();
-    atual = 0;
-    carregar();
-  }
-
-  function finalizar() {
+  function finalizarAtividade() {
+    if (finalizado) return;
+    finalizado = true;
     const nome = obterNomeAluno();
-    registrarResultado(nome, NOME_ATIVIDADE, pontos, desafios.length);
+    registrarResultado(nome, NOME_ATIVIDADE, pontos, desafios.length).then(() => {
+      document.body.innerHTML = `
+        <header style="display:flex; align-items:center; justify-content:space-between; padding:10px 20px; background:#111827; border-bottom:2px solid #22c55e;">
+          <div><h2>IFFar - Programação I</h2><p>Professor Cristhiano Vasconcellos</p></div>
+          <div>Pontuação final: ${pontos}</div>
+        </header>
+        <div style="text-align:center; padding:50px;">
+          <h1>🎉 Atividade concluída! 🎉</h1>
+          <h2>Você acertou ${pontos} de ${desafios.length} desafios.</h2>
+          <button onclick="location.href='index.html'">Voltar ao Menu</button>
+        </div>
+      `;
+    });
   }
 
-  // Conecta os botões
-  document.getElementById('verificarBtn').addEventListener('click', verificar);
-  document.getElementById('proximoBtn').addEventListener('click', proximo);
-  document.getElementById('reiniciarBtn').addEventListener('click', reiniciar);
-  document.getElementById('finalizarBtn').addEventListener('click', finalizar);
+  // Eventos de drag and drop
+  const dropzone = document.getElementById('dropzone');
+  dropzone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+  });
+  dropzone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    if (finalizado) return;
+    if (dragged && dragged.parentNode === document.getElementById('blocos-origem')) {
+      const clone = criarBloco(dragged.innerText, false);
+      dropzone.appendChild(clone);
+      dragged.remove();
+      dragged = null;
+    }
+  });
 
-  // Inicializa
+  // Botões
+  document.getElementById('verificarBtn').addEventListener('click', verificar);
+  document.getElementById('proximoBtn').addEventListener('click', proximoDesafio);
+  document.getElementById('reiniciarBtn').addEventListener('click', reiniciarDesafio);
+  document.getElementById('finalizarBtn').addEventListener('click', finalizarAtividade);
+
+  // Inicialização
   atualizarPontuacao();
-  carregar();
+  carregarDesafio(0);
 </script>
 </body>
 </html>
