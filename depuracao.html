@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Labirinto de Depuração - Programação I</title>
+<style>
+body { font-family: Arial; background:#0b0f1a; color:#fff; text-align:center; margin:0; }
+header { display:flex; align-items:center; justify-content:space-between; padding:10px 20px; background:#111827; border-bottom:2px solid #22c55e; }
+.controls { display:flex; align-items:center; gap:15px; }
+.progress { width:200px; height:10px; background:#333; border-radius:5px; overflow:hidden; }
+.progress-bar { height:100%; width:0%; background:#22c55e; }
+.slide { padding:40px; }
+button { padding:10px 20px; margin:10px; border:none; border-radius:5px; cursor:pointer; background:#22c55e; color:#000; font-weight:bold; }
+.code { background:#111; padding:15px; border-radius:8px; text-align:left; display:inline-block; white-space:pre; font-family: 'Courier New', monospace; font-size:14px; max-width:90%; overflow-x:auto; }
+.correct { color:#4caf50; }
+.error { color:#ff5252; }
+.feedback-area { margin-top:15px; font-size:16px; }
+</style>
+</head>
+<body>
+<header>
+  <div><h2>Programação I - Prof. Cristhiano</h2></div>
+  <div class="controls">
+    <div class="progress"><div id="bar" class="progress-bar"></div></div>
+    <div id="score">Pontos: 0</div>
+  </div>
+</header>
+
+<div class="slide">
+  <div id="codigo" class="code"></div>
+  <div style="margin-top:20px;"><button id="op1"></button> <button id="op2"></button></div>
+  <div id="feedback" class="feedback-area"></div>
+  <button onclick="proxima()">Próximo</button>
+</div>
+
+<script>
+// Base de questões com texto original e resposta correta ('a' ou 'b')
+const questoesBase = [
+  { codigo: `algoritmo "Exemplo1"\nvar\n   numero: inteiro\ninicio\n   numero <- 10\n   se numero > 5\n      escreva("Maior que 5")\n   fimse\nfimalgoritmo`, opA: "Falta 'entao' após a condição", opB: "A variável deveria ser real", correta: "a" },
+  { codigo: `algoritmo "Exemplo2"\nvar\n   cont: inteiro\ninicio\n   cont <- 1\n   enquanto cont < 5 faca\n      escreva(cont)\n      cont <- cont + 1\n   fimse\nfimalgoritmo`, opA: "O laço deve terminar com 'fimenquanto', não 'fimse'", opB: "Falta incrementar o contador", correta: "a" },
+  { codigo: `algoritmo "Exemplo3"\nvar\n   valor: inteiro\ninicio\n   valor <- 7\n   se valor % 2 = 0 entao\n      escreva("Par")\n   senao\n      escreva("Ímpar")\n   fimse\nfimalgoritmo`, opA: "O operador de resto em pseudocódigo é 'mod', não '%'", opB: "A variável deveria ser real", correta: "a" },
+  { codigo: `algoritmo "Exemplo4"\nvar\n   nota: real\ninicio\n   leia(nota)\n   se nota >= 7 entao\n      escreva("Aprovado")\n   senao nota >= 5\n      escreva("Recuperação")\n   senao\n      escreva("Reprovado")\n   fimse\nfimalgoritmo`, opA: "A estrutura 'senao nota >= 5' não é válida; deveria ser 'senao se nota >= 5'", opB: "Falta declarar a variável 'nota' como inteiro", correta: "a" },
+  { codigo: `algoritmo "Exemplo5"\nvar\n   i: inteiro\ninicio\n   para i de 1 ate 10 passo 1 faca\n      escreva(i)\n   fimenquanto\nfimalgoritmo`, opA: "O laço 'para' deve terminar com 'fimpara'", opB: "Faltou o passo 2", correta: "a" },
+  { codigo: `algoritmo "Exemplo6"\nvar\n   i: inteiro\ninicio\n   i <- 0\n   repita\n      escreva(i)\n      i <- i + 1\n   ate i = 10\nfimalgoritmo`, opA: "O laço 'repita' deve terminar com 'fimrepita'", opB: "A condição deveria ser i > 10", correta: "a" },
+  { codigo: `algoritmo "Exemplo7"\nvar\n   a, b: inteiro\ninicio\n   a <- 5\n   b <- 3\n   resultado <- a + b\n   escreva(resultado)\nfimalgoritmo`, opA: "A variável 'resultado' não foi declarada", opB: "Faltou o operador de soma", correta: "a" },
+  { codigo: `algoritmo "Exemplo8"\nvar\n   nome: caractere\ninicio\n   nome <- "Ana"\n   escreva("Olá, " + nome)\nfimalgoritmo`, opA: "Em pseudocódigo, a concatenação é feita com vírgula, não com '+'", opB: "Está correto, não há erro", correta: "a" },
+  { codigo: `algoritmo "Exemplo9"\nvar\n   x: inteiro\ninicio\n   x <- 10\n   se x > 5 entao\n      escreva("Maior")\n   fimse\n   escreva("Fim")\nfimalgoritmo`, opA: "Está correto, não há erro", opB: "Falta 'senao' para o caso contrário", correta: "a" },
+  { codigo: `algoritmo "Exemplo10"\nvar\n   idade: inteiro\ninicio\n   leia(idade)\n   se idade >= 18 entao\n      escreva("Maior de idade")\n   senao\n      escreva("Menor de idade")\nfimalgoritmo`, opA: "Falta 'fimse' para fechar a estrutura condicional", opB: "Falta declarar a variável 'idade'", correta: "a" }
+];
+
+// Função para embaralhar a ordem das opções e ajustar a resposta correta
+function prepararQuestao(base) {
+  // Decide se vamos inverter as opções (50% de chance)
+  const inverter = Math.random() < 0.5;
+  let opA, opB, correta;
+  if (inverter) {
+    opA = base.opB;
+    opB = base.opA;
+    correta = base.correta === 'a' ? 'b' : 'a';
+  } else {
+    opA = base.opA;
+    opB = base.opB;
+    correta = base.correta;
+  }
+  return { codigo: base.codigo, opA, opB, correta };
+}
+
+// Embaralhar a ordem das questões
+let questoes = questoesBase.map(prepararQuestao);
+questoes.sort(() => Math.random() - 0.5);
+
+let atual = 0, pontos = 0, respondeu = false, jaRegistrou = false;
+const URL_WEBAPP = "https://script.google.com/macros/s/AKfycbzoeygTm-R27yb8QOcdH0s7fViv6vGPQ5MtDuCgHBt3RhvFVQKlGxf3A7yQUR3RfRqFcw/exec";
+const NOME_ATIVIDADE = "Labirinto de Depuração";
+
+function obterNomeAluno() {
+  let nome = sessionStorage.getItem("nomeAluno");
+  if (!nome) {
+    nome = prompt("Digite seu nome completo para registrar sua atividade:");
+    if (nome && nome.trim() !== "") sessionStorage.setItem("nomeAluno", nome.trim());
+    else nome = "Anônimo";
+  }
+  return nome;
+}
+
+async function registrarResultado(nome, atividade, acertos, total) {
+  const dados = { nome, atividade, acertos, total };
+  try {
+    await fetch(URL_WEBAPP, { method:"POST", mode:"no-cors", headers:{"Content-Type":"application/json"}, body:JSON.stringify(dados) });
+    console.log("Registrado:", dados);
+  } catch(e) { console.error(e); }
+}
+
+function carregar() {
+  const q = questoes[atual];
+  document.getElementById('codigo').innerText = q.codigo;
+  document.getElementById('op1').innerText = q.opA;
+  document.getElementById('op2').innerText = q.opB;
+  document.getElementById('feedback').innerHTML = "";
+  respondeu = false;
+  atualizarUI();
+}
+
+function responder(op) {
+  if (respondeu) return;
+  respondeu = true;
+  const q = questoes[atual];
+  if (op === q.correta) {
+    pontos++;
+    document.getElementById('feedback').innerHTML = "<span class='correct'>✔ Correto!</span>";
+  } else {
+    document.getElementById('feedback').innerHTML = "<span class='error'>✖ Errado! Clique em Próximo.</span>";
+  }
+  atualizarUI();
+}
+
+function proxima() {
+  if (!respondeu) return;
+  atual++;
+  if (atual >= questoes.length) {
+    if (!jaRegistrou) {
+      jaRegistrou = true;
+      const nome = obterNomeAluno();
+      registrarResultado(nome, NOME_ATIVIDADE, pontos, questoes.length);
+    }
+    document.body.innerHTML = `
+      <header style="display:flex; align-items:center; justify-content:space-between; padding:10px 20px; background:#111827; border-bottom:2px solid #22c55e;">
+        <div><h2>Programação I - Prof. Cristhiano</h2></div>
+        <div>Pontos finais: ${pontos}</div>
+      </header>
+      <div style="text-align:center; padding:50px;">
+        <h1>🎉 Depuração finalizada! 🎉</h1>
+        <h2>Você acertou ${pontos} de ${questoes.length} questões.</h2>
+        <button onclick="location.href='index.html'">Voltar ao Menu</button>
+      </div>
+    `;
+    return;
+  }
+  carregar();
+}
+
+function atualizarUI() {
+  document.getElementById('score').innerText = "Pontos: " + pontos;
+  const percent = ((atual + (respondeu?1:0)) / questoes.length) * 100;
+  document.getElementById('bar').style.width = percent + "%";
+}
+
+document.getElementById('op1').onclick = () => responder('a');
+document.getElementById('op2').onclick = () => responder('b');
+carregar();
+</script>
+</body>
+</html>

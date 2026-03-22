@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fluxograma Interativo - Programação I</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #0b0f1a;
+      color: #fff;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 20px;
+      background: #111827;
+      border-bottom: 2px solid #22c55e;
+      flex-wrap: wrap;
+    }
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .progress {
+      width: 200px;
+      height: 10px;
+      background: #333;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: #22c55e;
+    }
+    .slide {
+      padding: 20px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    h3 { margin-top: 0; }
+    .columns {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 20px;
+      margin: 20px 0;
+    }
+    .fluxograma-col {
+      background: #1e2a3a;
+      border-radius: 12px;
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .fluxograma-col h4 { margin-top: 0; color: #22c55e; }
+    .diagram-container {
+      width: 100%;
+      overflow-x: auto;
+      display: flex;
+      justify-content: center;
+      min-height: 250px;
+    }
+    .code-col {
+      background: #111827;
+      border-radius: 12px;
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      cursor: pointer;
+      transition: 0.2s;
+      border: 2px solid transparent;
+    }
+    .code-col:hover {
+      border-color: #22c55e;
+      transform: scale(1.01);
+    }
+    .code-col.selected {
+      border-color: #22c55e;
+      background: #1f2937;
+    }
+    .code-col h4 { margin-top: 0; color: #22c55e; text-align: center; }
+    pre {
+      background: #0b0f1a;
+      padding: 12px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      line-height: 1.4;
+      margin: 0;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      color: #e2e8f0;
+    }
+    button {
+      background: #22c55e;
+      border: none;
+      color: #000;
+      font-weight: bold;
+      padding: 10px 24px;
+      border-radius: 30px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: 0.1s;
+      box-shadow: 0 3px 0 #15803d;
+      margin: 10px;
+    }
+    button:active {
+      transform: translateY(2px);
+      box-shadow: 0 1px 0 #15803d;
+    }
+    .feedback { margin: 15px 0; font-size: 18px; text-align: center; }
+    .correct { color: #4caf50; }
+    .error { color: #ff5252; }
+    footer { text-align: center; font-size: 12px; color: #6b7280; margin-top: 20px; }
+    @media (max-width: 900px) { .columns { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+<header>
+  <div><h2>Programação I - Prof. Cristhiano Vasconcellos</h2></div>
+  <div class="controls">
+    <div class="progress"><div id="bar" class="progress-bar"></div></div>
+    <div id="score">Pontos: 0</div>
+  </div>
+</header>
+
+<div class="slide">
+  <h3>📊 Fluxograma Interativo</h3>
+  <p>Analise o fluxograma e clique no código que melhor representa sua lógica.</p>
+  <div class="columns">
+    <div class="fluxograma-col">
+      <h4>📐 Fluxograma</h4>
+      <div class="diagram-container"><div id="diagrama"></div></div>
+    </div>
+    <div id="colCode0" class="code-col"><h4>🔹 Opção A</h4><pre id="code0"></pre></div>
+    <div id="colCode1" class="code-col"><h4>🔹 Opção B</h4><pre id="code1"></pre></div>
+  </div>
+  <div style="text-align: center;"><button id="btnProximo">Próximo</button></div>
+  <div id="feedback" class="feedback"></div>
+  <footer>Clique no código que corresponde ao fluxograma</footer>
+</div>
+
+<script>
+mermaid.initialize({
+  startOnLoad: false,
+  theme: 'dark',
+  themeVariables: {
+    background: '#1e2a3a',
+    primaryColor: '#22c55e',
+    primaryBorderColor: '#22c55e',
+    primaryTextColor: '#fff',
+    lineColor: '#22c55e',
+    secondaryColor: '#2d3748',
+    tertiaryColor: '#111827'
+  },
+  flowchart: { useMaxWidth: true, htmlLabels: true }
+});
+
+// ---------- QUESTÕES COM FLUXOGRAMAS TOTALMENTE TEXTUAIS (sem operadores) ----------
+const questoesBase = [
+  { // 1 - Aprovação
+    diagrama: `graph TD
+      A[Início] --> B[Leia nota]
+      B --> C{nota maior ou igual a 7}
+      C -->|Sim| D[Aprovado]
+      C -->|Não| E[Reprovado]
+      D --> F[Fim]
+      E --> F`,
+    codigos: [
+      "algoritmo \"Aprovacao\"\nvar\n   nota: real\ninicio\n   leia(nota)\n   se nota >= 7 entao\n      escreva(\"Aprovado\")\n   senao\n      escreva(\"Reprovado\")\n   fimse\nfimalgoritmo",
+      "algoritmo \"Aprovacao\"\nvar\n   nota: real\ninicio\n   leia(nota)\n   se nota > 7 entao\n      escreva(\"Aprovado\")\n   senao\n      escreva(\"Reprovado\")\n   fimse\nfimalgoritmo"
+    ],
+    correta: 0
+  },
+  { // 2 - Maior de dois
+    diagrama: `graph TD
+      A[Início] --> B[Leia x, y]
+      B --> C{x maior que y}
+      C -->|Sim| D[Escreva x]
+      C -->|Não| E[Escreva y]
+      D --> F[Fim]
+      E --> F`,
+    codigos: [
+      "algoritmo \"Maior\"\nvar\n   x, y: inteiro\ninicio\n   leia(x, y)\n   se x > y entao\n      escreva(x)\n   senao\n      escreva(y)\n   fimse\nfimalgoritmo",
+      "algoritmo \"Maior\"\nvar\n   x, y: inteiro\ninicio\n   leia(x, y)\n   se x < y entao\n      escreva(x)\n   senao\n      escreva(y)\n   fimse\nfimalgoritmo"
+    ],
+    correta: 0
+  },
+  { // 3 - Par ou Ímpar
+    diagrama: `graph TD
+      A[Início] --> B[Leia num]
+      B --> C{resto da divisao por 2 igual a 0}
+      C -->|Sim| D[Escreva Par]
+      C -->|Não| E[Escreva Ímpar]
+      D --> F[Fim]
+      E --> F`,
+    codigos: [
+      "algoritmo \"ParImpar\"\nvar\n   num: inteiro\ninicio\n   leia(num)\n   se num % 2 == 0 entao\n      escreva(\"Par\")\n   senao\n      escreva(\"Ímpar\")\n   fimse\nfimalgoritmo",
+      "algoritmo \"ParImpar\"\nvar\n   num: inteiro\ninicio\n   leia(num)\n   se num mod 2 == 0 entao\n      escreva(\"Ímpar\")\n   senao\n      escreva(\"Par\")\n   fimse\nfimalgoritmo"
+    ],
+    correta: 0
+  },
+  { // 4 - Média
+    diagrama: `graph TD
+      A[Início] --> B[Leia a, b, c]
+      B --> C[media igual a a mais b mais c dividido por 3]
+      C --> D{media maior ou igual a 6}
+      D -->|Sim| E[Aprovado]
+      D -->|Não| F[Reprovado]
+      E --> G[Fim]
+      F --> G`,
+    codigos: [
+      "algoritmo \"Media\"\nvar\n   a,b,c,media: real\ninicio\n   leia(a,b,c)\n   media <- (a+b+c)/3\n   se media >= 6 entao\n      escreva(\"Aprovado\")\n   senao\n      escreva(\"Reprovado\")\n   fimse\nfimalgoritmo",
+      "algoritmo \"Media\"\nvar\n   a,b,c,media: real\ninicio\n   leia(a,b,c)\n   media <- (a+b+c)/3\n   se media > 6 entao\n      escreva(\"Aprovado\")\n   senao\n      escreva(\"Reprovado\")\n   fimse\nfimalgoritmo"
+    ],
+    correta: 0
+  },
+  { // 5 - Laço enquanto (contagem)
+    diagrama: `graph TD
+      A[Início] --> B[x igual a 1]
+      B --> C{x menor ou igual a 5}
+      C -->|Sim| D[Escreva x]
+      D --> E[x igual a x mais 1]
+      E --> C
+      C -->|Não| F[Fim]`,
+    codigos: [
+      "algoritmo \"Contagem\"\nvar\n   x: inteiro\ninicio\n   x <- 1\n   enquanto x <= 5 faca\n      escreva(x)\n      x <- x + 1\n   fimenquanto\nfimalgoritmo",
+      "algoritmo \"Contagem\"\nvar\n   x: inteiro\ninicio\n   x <- 1\n   repita\n      escreva(x)\n      x <- x + 1\n   ate x = 5\nfimalgoritmo"
+    ],
+    correta: 0
+  },
+  { // 6 - Maioridade
+    diagrama: `graph TD
+      A[Início] --> B[Leia idade]
+      B --> C{idade maior ou igual a 18}
+      C -->|Sim| D[Escreva Maior de idade]
+      C -->|Não| E[Escreva Menor de idade]
+      D --> F[Fim]
+      E --> F`,
+    codigos: [
+      "algoritmo \"Maioridade\"\nvar\n   idade: inteiro\ninicio\n   leia(idade)\n   se idade >= 18 entao\n      escreva(\"Maior de idade\")\n   senao\n      escreva(\"Menor de idade\")\n   fimse\nfimalgoritmo",
+      "algoritmo \"Maioridade\"\nvar\n   idade: inteiro\ninicio\n   leia(idade)\n   se idade > 18 entao\n      escreva(\"Maior de idade\")\n   senao\n      escreva(\"Menor de idade\")\n   fimse\nfimalgoritmo"
+    ],
+    correta: 0
+  },
+  { // 7 - Sinal com três casos
+    diagrama: `graph TD
+      A[Início] --> B[Leia valor]
+      B --> C{valor maior que 0}
+      C -->|Sim| D[Escreva Positivo]
+      C -->|Não| E{valor menor que 0}
+      E -->|Sim| F[Escreva Negativo]
+      E -->|Não| G[Escreva Zero]
+      D --> H[Fim]
+      F --> H
+      G --> H`,
+    codigos: [
+      "algoritmo \"Sinal\"\nvar\n   valor: real\ninicio\n   leia(valor)\n   se valor > 0 entao\n      escreva(\"Positivo\")\n   senao\n      se valor < 0 entao\n         escreva(\"Negativo\")\n      senao\n         escreva(\"Zero\")\n      fimse\n   fimse\nfimalgoritmo",
+      "algoritmo \"Sinal\"\nvar\n   valor: real\ninicio\n   leia(valor)\n   se valor >= 0 entao\n      escreva(\"Positivo\")\n   senao\n      escreva(\"Negativo\")\n   fimse\nfimalgoritmo"
+    ],
+    correta: 0
+  },
+  { // 8 - Classificação com zero
+    diagrama: `graph TD
+      A[Início] --> B[Leia num]
+      B --> C{num igual a 0}
+      C -->|Sim| D[Escreva Zero]
+      C -->|Não| E{num maior que 0}
+      E -->|Sim| F[Escreva Positivo]
+      E -->|Não| G[Escreva Negativo]
+      D --> H[Fim]
+      F --> H
+      G --> H`,
+    codigos: [
+      "algoritmo \"Classifica\"\nvar\n   num: inteiro\ninicio\n   leia(num)\n   se num = 0 entao\n      escreva(\"Zero\")\n   senao\n      se num > 0 entao\n         escreva(\"Positivo\")\n      senao\n         escreva(\"Negativo\")\n      fimse\n   fimse\nfimalgoritmo",
+      "algoritmo \"Classifica\"\nvar\n   num: inteiro\ninicio\n   leia(num)\n   se num > 0 entao\n      escreva(\"Positivo\")\n   senao\n      escreva(\"Negativo\")\n   fimse\nfimalgoritmo"
+    ],
+    correta: 0
+  }
+];
+
+// Embaralhar e randomizar posição da opção correta
+let questoes = [];
+for (let base of questoesBase) {
+  const inverter = Math.random() < 0.5;
+  let codigos = [...base.codigos];
+  let corretaIndex = base.correta;
+  if (inverter) {
+    codigos.reverse();
+    corretaIndex = 1 - corretaIndex;
+  }
+  questoes.push({
+    diagrama: base.diagrama,
+    opcoes: codigos,
+    correta: corretaIndex
+  });
+}
+questoes.sort(() => Math.random() - 0.5);
+
+// ---------- VARIÁVEIS ----------
+let atual = 0;
+let pontos = 0;
+let respondeu = false;
+let jaRegistrou = false;
+let opcaoSelecionada = null;
+
+const URL_WEBAPP = "https://script.google.com/macros/s/AKfycbzoeygTm-R27yb8QOcdH0s7fViv6vGPQ5MtDuCgHBt3RhvFVQKlGxf3A7yQUR3RfRqFcw/exec";
+const NOME_ATIVIDADE = "Fluxograma Interativo";
+
+function obterNomeAluno() {
+  let nome = sessionStorage.getItem("nomeAluno");
+  if (!nome) {
+    nome = prompt("Digite seu nome completo para registrar sua atividade:");
+    if (nome && nome.trim() !== "") sessionStorage.setItem("nomeAluno", nome.trim());
+    else nome = "Anônimo";
+  }
+  return nome;
+}
+
+async function registrarResultado(nome, atividade, acertos, total) {
+  const dados = { nome, atividade, acertos, total };
+  try {
+    await fetch(URL_WEBAPP, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(dados)
+    });
+    console.log("Registrado:", dados);
+  } catch (e) {
+    console.error("Erro ao registrar:", e);
+  }
+}
+
+async function renderizarFluxograma(diagrama) {
+  const container = document.getElementById('diagrama');
+  container.innerHTML = '';
+  try {
+    const id = `mermaid-${Date.now()}`;
+    const { svg } = await mermaid.render(id, diagrama);
+    container.innerHTML = svg;
+  } catch (err) {
+    console.error("Erro Mermaid:", err);
+    container.innerHTML = '<p style="color:red;">⚠️ Erro ao renderizar fluxograma. Tente recarregar a página.</p>';
+  }
+}
+
+function carregar() {
+  const q = questoes[atual];
+  renderizarFluxograma(q.diagrama);
+  document.getElementById('code0').innerText = q.opcoes[0];
+  document.getElementById('code1').innerText = q.opcoes[1];
+  document.getElementById('colCode0').classList.remove('selected');
+  document.getElementById('colCode1').classList.remove('selected');
+  opcaoSelecionada = null;
+  respondeu = false;
+  document.getElementById('feedback').innerHTML = '';
+  atualizarUI();
+}
+
+function selecionarOpcao(idx) {
+  if (respondeu) return;
+  opcaoSelecionada = idx;
+  document.getElementById('colCode0').classList.remove('selected');
+  document.getElementById('colCode1').classList.remove('selected');
+  document.getElementById(`colCode${idx}`).classList.add('selected');
+}
+
+function verificar() {
+  if (respondeu) return;
+  if (opcaoSelecionada === null) {
+    document.getElementById('feedback').innerHTML = "<span class='error'>⚠️ Clique em um dos códigos para responder.</span>";
+    return;
+  }
+  respondeu = true;
+  const q = questoes[atual];
+  const acertou = (opcaoSelecionada === q.correta);
+  if (acertou) {
+    pontos++;
+    document.getElementById('feedback').innerHTML = "<span class='correct'>✔ Correto! O código corresponde ao fluxograma.</span>";
+  } else {
+    document.getElementById('feedback').innerHTML = "<span class='error'>✖ Errado! O fluxograma representa outra lógica. Tente o próximo.</span>";
+  }
+  atualizarUI();
+}
+
+function proxima() {
+  if (!respondeu) {
+    verificar();
+    return;
+  }
+  atual++;
+  if (atual >= questoes.length) {
+    if (!jaRegistrou) {
+      jaRegistrou = true;
+      const nome = obterNomeAluno();
+      registrarResultado(nome, NOME_ATIVIDADE, pontos, questoes.length);
+    }
+    document.body.innerHTML = `
+      <header style="display:flex; align-items:center; justify-content:space-between; padding:10px 20px; background:#111827; border-bottom:2px solid #22c55e;">
+        <div><h2>Programação I - Prof. Cristhiano Vasconcellos</h2></div>
+        <div>Pontos finais: ${pontos}</div>
+      </header>
+      <div style="text-align:center; padding:50px;">
+        <h1>🎉 Fluxogramas concluídos! 🎉</h1>
+        <h2>Você acertou ${pontos} de ${questoes.length} questões.</h2>
+        <button onclick="location.href='index.html'">Voltar ao Menu</button>
+      </div>
+    `;
+    return;
+  }
+  carregar();
+}
+
+function atualizarUI() {
+  document.getElementById('score').innerText = "Pontos: " + pontos;
+  const percent = ((atual + (respondeu ? 1 : 0)) / questoes.length) * 100;
+  document.getElementById('bar').style.width = percent + "%";
+}
+
+document.getElementById('colCode0').addEventListener('click', () => selecionarOpcao(0));
+document.getElementById('colCode1').addEventListener('click', () => selecionarOpcao(1));
+document.getElementById('btnProximo').addEventListener('click', proxima);
+
+carregar();
+</script>
+</body>
+</html>

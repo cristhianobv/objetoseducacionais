@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Slides Interativos - Programação I</title>
+<title>Quiz - Programação I</title>
 <style>
 body { font-family: Arial; background:#0b0f1a; color:#fff; text-align:center; margin:0; }
 header { display:flex; align-items:center; justify-content:space-between; padding:10px 20px; background:#111827; border-bottom:2px solid #22c55e; }
@@ -10,7 +10,7 @@ header { display:flex; align-items:center; justify-content:space-between; paddin
 .progress { width:200px; height:10px; background:#333; border-radius:5px; overflow:hidden; }
 .progress-bar { height:100%; width:0%; background:#22c55e; }
 .slide { padding:40px; }
-button { padding:10px 20px; margin:10px; border:none; border-radius:5px; cursor:pointer; background:#22c55e; color:#000; }
+button { padding:10px 20px; margin:10px; border:none; border-radius:5px; cursor:pointer; background:#22c55e; color:#000; font-weight:bold; }
 .code { background:#111; padding:15px; border-radius:8px; text-align:left; display:inline-block; white-space:pre; font-family: 'Courier New', monospace; }
 .correct { color:#4caf50; }
 .error { color:#ff5252; }
@@ -18,9 +18,7 @@ button { padding:10px 20px; margin:10px; border:none; border-radius:5px; cursor:
 </head>
 <body>
 <header>
-  <div>
-    <h2>Programação I - Prof. Cristhiano</h2>
-  </div>
+  <div><h2>Programação I - Prof. Cristhiano</h2></div>
   <div class="controls">
     <div class="progress"><div id="bar" class="progress-bar"></div></div>
     <div id="score">Pontos: 0</div>
@@ -29,86 +27,131 @@ button { padding:10px 20px; margin:10px; border:none; border-radius:5px; cursor:
 
 <div class="slide">
   <div id="codigo" class="code"></div>
-  <div>
-    <button id="op1"></button>
-    <button id="op2"></button>
-  </div>
+  <div><button id="op1"></button> <button id="op2"></button></div>
   <p id="feedback"></p>
   <button onclick="proxima()">Próximo</button>
 </div>
 
 <script>
-let perguntas = [
-{c:"x <- 10\nx <- x + 5\nescreva(x)",a:"15",b:"10",correta:"a"},
-{c:"x <- 3\nx <- x * 2\nescreva(x)",a:"6",b:"5",correta:"a"},
-{c:"x <- 8\nx <- x - 3\nescreva(x)",a:"5",b:"3",correta:"a"},
-{c:"x <- 4\nse x > 2 entao\n escreva(\"OK\")\nfimse",a:"OK",b:"Nada",correta:"a"},
-{c:"x <- 1\nse x > 2 entao\n escreva(\"OK\")\nfimse",a:"Nada",b:"OK",correta:"a"},
-{c:"x <- 7\nse x < 5 entao\n escreva(\"A\")\nsenao\n escreva(\"B\")\nfimse",a:"A",b:"B",correta:"b"},
-{c:"x <- 2\nse x = 2 entao\n escreva(\"Certo\")\nfimse",a:"Certo",b:"Nada",correta:"a"},
-{c:"x <- 9\nx <- x / 3\nescreva(x)",a:"3",b:"6",correta:"a"},
-{c:"x <- 5\nse x >= 5 entao\n escreva(\"Sim\")\nfimse",a:"Sim",b:"Não",correta:"a"},
-{c:"x <- 0\nse x > 0 entao\n escreva(\"Positivo\")\nfimse",a:"Nada",b:"Positivo",correta:"a"},
-{c:"x <- 6\nx <- x - 1\nescreva(x)",a:"5",b:"6",correta:"a"},
-{c:"x <- 2\nx <- x * x\nescreva(x)",a:"4",b:"2",correta:"a"},
-{c:"x <- 10\nse x <= 5 entao\n escreva(\"A\")\nsenao\n escreva(\"B\")\nfimse",a:"A",b:"B",correta:"b"},
-{c:"x <- 3\nse x != 3 entao\n escreva(\"Erro\")\nfimse",a:"Nada",b:"Erro",correta:"a"},
-{c:"x <- 4\nx <- x + 1\nescreva(x)",a:"5",b:"4",correta:"a"},
-{c:"x <- 5\nse x < 10 entao\n escreva(\"OK\")\nfimse",a:"OK",b:"Nada",correta:"a"},
-{c:"x <- 8\nx <- x / 2\nescreva(x)",a:"4",b:"8",correta:"a"},
-{c:"x <- 1\nx <- x + 9\nescreva(x)",a:"10",b:"9",correta:"a"},
-{c:"x <- 7\nse x > 10 entao\n escreva(\"A\")\nsenao\n escreva(\"B\")\nfimse",a:"A",b:"B",correta:"b"},
-{c:"x <- 10\nse x >= 10 entao\n escreva(\"A\")\nsenao\n escreva(\"B\")\nfimse",a:"A",b:"B",correta:"a"}
+// ---------- DADOS DA ATIVIDADE ----------
+const perguntas = [
+  {c:"x <- 10\nx <- x + 5\nescreva(x)",a:"15",b:"10",correta:"a"},
+  {c:"x <- 3\nx <- x * 2\nescreva(x)",a:"6",b:"5",correta:"a"},
+  {c:"x <- 8\nx <- x - 3\nescreva(x)",a:"5",b:"3",correta:"a"},
+  {c:"x <- 4\nse x > 2 entao\n escreva(\"OK\")\nfimse",a:"OK",b:"Nada",correta:"a"},
+  {c:"x <- 1\nse x > 2 entao\n escreva(\"OK\")\nfimse",a:"Nada",b:"OK",correta:"a"},
+  {c:"x <- 7\nse x < 5 entao\n escreva(\"A\")\nsenao\n escreva(\"B\")\nfimse",a:"A",b:"B",correta:"b"},
+  {c:"x <- 2\nse x = 2 entao\n escreva(\"Certo\")\nfimse",a:"Certo",b:"Nada",correta:"a"},
+  {c:"x <- 9\nx <- x / 3\nescreva(x)",a:"3",b:"6",correta:"a"},
+  {c:"x <- 5\nse x >= 5 entao\n escreva(\"Sim\")\nfimse",a:"Sim",b:"Não",correta:"a"},
+  {c:"x <- 0\nse x > 0 entao\n escreva(\"Positivo\")\nfimse",a:"Nada",b:"Positivo",correta:"a"},
+  {c:"x <- 6\nx <- x - 1\nescreva(x)",a:"5",b:"6",correta:"a"},
+  {c:"x <- 2\nx <- x * x\nescreva(x)",a:"4",b:"2",correta:"a"},
+  {c:"x <- 10\nse x <= 5 entao\n escreva(\"A\")\nsenao\n escreva(\"B\")\nfimse",a:"A",b:"B",correta:"b"},
+  {c:"x <- 3\nse x != 3 entao\n escreva(\"Erro\")\nfimse",a:"Nada",b:"Erro",correta:"a"},
+  {c:"x <- 4\nx <- x + 1\nescreva(x)",a:"5",b:"4",correta:"a"},
+  {c:"x <- 5\nse x < 10 entao\n escreva(\"OK\")\nfimse",a:"OK",b:"Nada",correta:"a"},
+  {c:"x <- 8\nx <- x / 2\nescreva(x)",a:"4",b:"8",correta:"a"},
+  {c:"x <- 1\nx <- x + 9\nescreva(x)",a:"10",b:"9",correta:"a"},
+  {c:"x <- 7\nse x > 10 entao\n escreva(\"A\")\nsenao\n escreva(\"B\")\nfimse",a:"A",b:"B",correta:"b"},
+  {c:"x <- 10\nse x >= 10 entao\n escreva(\"A\")\nsenao\n escreva(\"B\")\nfimse",a:"A",b:"B",correta:"a"}
 ];
-
-// embaralhar
 perguntas.sort(()=>Math.random()-0.5);
 
-let atual = 0;
-let pontos = 0;
-let respondeu = false;
+// ---------- VARIÁVEIS GLOBAIS ----------
+let atual = 0, pontos = 0, respondeu = false, jaRegistrou = false;
+const NOME_ATIVIDADE = "Quiz de Pseudocódigo";
+const URL_WEBAPP = "https://script.google.com/macros/s/AKfycbzoeygTm-R27yb8QOcdH0s7fViv6vGPQ5MtDuCgHBt3RhvFVQKlGxf3A7yQUR3RfRqFcw/exec";
 
-function carregar(){
- let p = perguntas[atual];
- document.getElementById('codigo').innerText = p.c;
- document.getElementById('op1').innerText = p.a;
- document.getElementById('op2').innerText = p.b;
- document.getElementById('feedback').innerText = "";
- respondeu = false;
- atualizarUI();
+// ---------- FUNÇÃO PARA OBTER NOME DO ALUNO ----------
+function obterNomeAluno() {
+  let nome = sessionStorage.getItem("nomeAluno");
+  if (!nome) {
+    nome = prompt("Digite seu nome completo para registrar sua atividade:");
+    if (nome && nome.trim() !== "") {
+      sessionStorage.setItem("nomeAluno", nome.trim());
+    } else {
+      nome = "Anônimo";
+    }
+  }
+  return nome;
 }
 
-function responder(op){
- if(respondeu) return;
- respondeu = true;
- let p = perguntas[atual];
- if(op === p.correta){
-   pontos++;
-   feedback.innerHTML = "<span class='correct'>✔ Correto!</span>";
- } else {
-   feedback.innerHTML = "<span class='error'>✖ Errado! Clique em Próximo</span>";
- }
- atualizarUI();
+// ---------- FUNÇÃO DE REGISTRO NA PLANILHA ----------
+async function registrarResultado(nome, atividade, acertos, total) {
+  const dados = { nome, atividade, acertos, total };
+  try {
+    await fetch(URL_WEBAPP, {
+      method: "POST",
+      mode: "no-cors", // evita bloqueio CORS, mas sem resposta
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(dados)
+    });
+    console.log("✅ Registrado:", dados);
+  } catch (erro) {
+    console.error("❌ Erro ao registrar:", erro);
+  }
 }
 
-function proxima(){
- if(!respondeu) return;
- atual++;
- if(atual >= perguntas.length){
-   document.body.innerHTML = "<h1>Fim 🎉</h1><h2>Pontos: "+pontos+"</h2>";
-   return;
- }
- carregar();
+// ---------- LÓGICA DO QUIZ ----------
+function carregar() {
+  const p = perguntas[atual];
+  document.getElementById('codigo').innerText = p.c;
+  document.getElementById('op1').innerText = p.a;
+  document.getElementById('op2').innerText = p.b;
+  document.getElementById('feedback').innerHTML = "";
+  respondeu = false;
+  atualizarUI();
 }
 
-document.getElementById('op1').onclick = ()=>responder('a');
-document.getElementById('op2').onclick = ()=>responder('b');
-
-function atualizarUI(){
- document.getElementById('score').innerText = "Pontos: " + pontos;
- document.getElementById('bar').style.width = ((atual+1)/perguntas.length*100)+"%";
+function responder(op) {
+  if (respondeu) return;
+  respondeu = true;
+  const p = perguntas[atual];
+  if (op === p.correta) {
+    pontos++;
+    document.getElementById('feedback').innerHTML = "<span class='correct'>✔ Correto!</span>";
+  } else {
+    document.getElementById('feedback').innerHTML = "<span class='error'>✖ Errado! Clique em Próximo</span>";
+  }
+  atualizarUI();
 }
 
+function proxima() {
+  if (!respondeu) return;
+  atual++;
+  if (atual >= perguntas.length) {
+    // Fim do quiz – registrar UMA VEZ
+    if (!jaRegistrou) {
+      jaRegistrou = true;
+      const nome = obterNomeAluno();
+      registrarResultado(nome, NOME_ATIVIDADE, pontos, perguntas.length);
+    }
+    document.body.innerHTML = `
+      <header style="display:flex; align-items:center; justify-content:space-between; padding:10px 20px; background:#111827; border-bottom:2px solid #22c55e;">
+        <div><h2>Programação I - Prof. Cristhiano</h2></div>
+        <div>Pontos finais: ${pontos}</div>
+      </header>
+      <div style="text-align:center; padding:50px;">
+        <h1>🎉 Quiz finalizado! 🎉</h1>
+        <h2>Você acertou ${pontos} de ${perguntas.length} questões.</h2>
+        <button onclick="location.href='index.html'">Voltar ao Menu</button>
+      </div>
+    `;
+    return;
+  }
+  carregar();
+}
+
+function atualizarUI() {
+  document.getElementById('score').innerText = "Pontos: " + pontos;
+  const percent = ((atual+1)/perguntas.length)*100;
+  document.getElementById('bar').style.width = percent + "%";
+}
+
+// ---------- INICIAR ----------
+document.getElementById('op1').onclick = () => responder('a');
+document.getElementById('op2').onclick = () => responder('b');
 carregar();
 </script>
 </body>

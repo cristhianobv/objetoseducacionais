@@ -2,605 +2,222 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-  <title>🤖 Robô com Condições - IFFar (5 Níveis)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🤖 Robô com Condições - IFFar</title>
   <style>
-    * {
-      box-sizing: border-box;
-      font-family: 'Segoe UI', Arial, sans-serif;
-    }
-    body {
-      margin: 0;
-      background: #0b0f1a;
-      color: #fff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 100vh;
-      font-size: 14px;
-    }
-    header {
-      width: 100%;
-      background: #111827;
-      border-bottom: 2px solid #22c55e;
-      text-align: center;
-      padding: 8px 0;
-    }
-    header h2 {
-      margin: 0;
-      color: #22c55e;
-      font-size: 1.4rem;
-    }
-    header p {
-      margin: 2px 0 0;
-      font-size: 0.8rem;
-      color: #9ca3af;
-    }
-    .container {
-      max-width: 900px;
-      width: 100%;
-      padding: 10px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    h3 {
-      color: #22c55e;
-      margin: 5px 0;
-      font-size: 1.2rem;
-    }
-    .niveis {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      justify-content: center;
-      margin: 10px 0;
-    }
-    .btn-nivel {
-      background: #2d3748;
-      color: white;
-      border: 1px solid #22c55e;
-      padding: 6px 12px;
-      border-radius: 20px;
-      cursor: pointer;
-      font-weight: bold;
-      font-size: 0.9rem;
-    }
-    .btn-nivel.ativo {
-      background: #22c55e;
-      color: black;
-    }
-    .grid-container {
-      background: #1f2937;
-      padding: 12px;
-      border-radius: 16px;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.7);
-      margin: 5px 0;
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(5, 45px);
-      grid-template-rows: repeat(5, 45px);
-      gap: 4px;
-      justify-content: center;
-    }
-    .cell {
-      width: 45px;
-      height: 45px;
-      background: #2d3748;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      box-shadow: inset 0 -2px 0 #0f172a;
-    }
-    .obstacle { background: #dc2626; }
-    .goal { background: #16a34a; }
-    .robot { background: #2563eb; }
-    .robot[data-direcao="right"]::after { content: "➡️"; font-size: 18px; }
-    .robot[data-direcao="left"]::after { content: "⬅️"; font-size: 18px; }
-    .robot[data-direcao="up"]::after { content: "⬆️"; font-size: 18px; }
-    .robot[data-direcao="down"]::after { content: "⬇️"; font-size: 18px; }
-
-    .painel {
-      background: #1f2937;
-      padding: 12px;
-      border-radius: 16px;
-      width: 100%;
-      margin: 8px 0;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 15px;
-    }
-    .col-esquerda {
-      flex: 2;
-      min-width: 250px;
-    }
-    .col-direita {
-      flex: 1;
-      min-width: 200px;
-      background: #111827;
-      border-radius: 12px;
-      padding: 10px;
-      font-family: 'Courier New', monospace;
-      font-size: 0.8rem;
-      color: #22c55e;
-      border: 1px solid #374151;
-      max-height: 200px;
-      overflow-y: auto;
-    }
-    .comandos-display {
-      background: #111827;
-      padding: 10px;
-      border-radius: 12px;
-      margin: 8px 0;
-      min-height: 50px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      align-items: center;
-      border: 1px solid #374151;
-    }
-    .comando-tag {
-      background: #22c55e;
-      color: #000;
-      padding: 3px 10px;
-      border-radius: 20px;
-      font-weight: bold;
-      font-size: 0.8rem;
-      transition: 0.2s;
-      border: 2px solid transparent;
-    }
-    .comando-tag.ativo {
-      border-color: #fff;
-      transform: scale(1.05);
-      background: #4ade80;
-    }
-    .controles {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      justify-content: center;
-      margin: 8px 0;
-    }
-    button {
-      background: #22c55e;
-      border: none;
-      color: #000;
-      font-weight: bold;
-      padding: 8px 12px;
-      border-radius: 30px;
-      font-size: 0.8rem;
-      cursor: pointer;
-      transition: 0.1s;
-      box-shadow: 0 3px 0 #15803d;
-      flex: 1 0 80px;
-    }
-    button:hover {
-      background: #4ade80;
-      transform: translateY(-2px);
-      box-shadow: 0 5px 0 #15803d;
-    }
-    button:active {
-      transform: translateY(3px);
-      box-shadow: 0 1px 0 #15803d;
-    }
-    button:disabled {
-      opacity: 0.4;
-      pointer-events: none;
-      background: #9ca3af;
-      box-shadow: 0 3px 0 #4b5563;
-    }
-    #feedback {
-      background: #111827;
-      padding: 8px 12px;
-      border-radius: 30px;
-      font-size: 0.9rem;
-      text-align: center;
-      border-left: 4px solid #22c55e;
-      margin: 5px 0;
-      width: 100%;
-    }
-    .status {
-      color: #9ca3af;
-      font-size: 0.8rem;
-      display: flex;
-      justify-content: space-between;
-    }
-    .pseudocodigo-titulo {
-      font-weight: bold;
-      margin-bottom: 5px;
-      color: #22c55e;
-      font-size: 0.9rem;
-    }
+    * { box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+    body { margin:0; background:#0b0f1a; color:#fff; display:flex; flex-direction:column; align-items:center; min-height:100vh; font-size:14px; }
+    header { width:100%; background:#111827; border-bottom:2px solid #22c55e; text-align:center; padding:8px 0; }
+    header h2 { margin:0; color:#22c55e; font-size:1.4rem; }
+    .container { max-width:900px; width:100%; padding:10px; display:flex; flex-direction:column; align-items:center; }
+    .niveis { display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin:10px 0; }
+    .btn-nivel { background:#2d3748; color:white; border:1px solid #22c55e; padding:6px 12px; border-radius:20px; cursor:pointer; }
+    .btn-nivel.ativo { background:#22c55e; color:black; }
+    .grid { display:grid; grid-template-columns:repeat(5,45px); grid-template-rows:repeat(5,45px); gap:4px; background:#1f2937; padding:12px; border-radius:16px; }
+    .cell { width:45px; height:45px; background:#2d3748; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:20px; }
+    .obstacle { background:#dc2626; }
+    .goal { background:#16a34a; }
+    .robot { background:#2563eb; }
+    .robot[data-direcao="right"]::after { content:"➡️"; }
+    .robot[data-direcao="left"]::after { content:"⬅️"; }
+    .robot[data-direcao="up"]::after { content:"⬆️"; }
+    .robot[data-direcao="down"]::after { content:"⬇️"; }
+    .painel { background:#1f2937; padding:12px; border-radius:16px; width:100%; margin:8px 0; display:flex; flex-wrap:wrap; gap:15px; }
+    .col-esquerda { flex:2; min-width:250px; }
+    .col-direita { flex:1; min-width:200px; background:#111827; border-radius:12px; padding:10px; font-family:monospace; font-size:0.8rem; color:#22c55e; max-height:200px; overflow-y:auto; }
+    .comandos-display { background:#111827; padding:10px; border-radius:12px; margin:8px 0; min-height:50px; display:flex; flex-wrap:wrap; gap:6px; }
+    .comando-tag { background:#22c55e; color:#000; padding:3px 10px; border-radius:20px; font-weight:bold; font-size:0.8rem; }
+    .comando-tag.ativo { border:2px solid #fff; background:#4ade80; }
+    button { background:#22c55e; border:none; color:#000; font-weight:bold; padding:8px 12px; border-radius:30px; cursor:pointer; margin:5px; box-shadow:0 3px 0 #15803d; }
+    button:active { transform:translateY(3px); box-shadow:0 1px 0 #15803d; }
+    button:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
+    #feedback { background:#111827; padding:8px 12px; border-radius:30px; text-align:center; border-left:4px solid #22c55e; margin:5px 0; }
   </style>
 </head>
 <body>
-  <header>
-    <h2>IFFar - Programação I</h2>
-    <p>Professor Cristhiano Vasconcellos</p>
-  </header>
-
-  <div class="container">
-    <h3>🤖 Robô com Condições - 5 Níveis</h3>
-
-    <!-- Seletor de níveis -->
-    <div class="niveis" id="seletorNiveis"></div>
-
-    <div class="grid-container">
-      <div id="grid" class="grid"></div>
-    </div>
-
-    <div class="painel">
-      <div class="col-esquerda">
-        <div class="status">
-          <span id="direcaoAtual">Direção: ➡️</span>
-          <span>Nível <span id="nivelAtual">1</span>/5</span>
-        </div>
-        <div id="comandosLista" class="comandos-display"></div>
-
-        <div class="controles">
-          <button id="btnAndar">➕ Andar</button>
-          <button id="btnVirar">🔄 Virar</button>
-          <button id="btnExecutar">▶ Executar</button>
-          <button id="btnPasso">⏯ Passo</button>
-          <button id="btnReiniciar">🔄 Reiniciar</button>
-        </div>
-      </div>
-      <div class="col-direita">
-        <div class="pseudocodigo-titulo">📝 Pseudocódigo (Visualg 2.5)</div>
-        <pre id="pseudocodigo" style="margin:0; white-space: pre-wrap;">algoritmo "Robo"
-var
-inicio</pre>
+<header><h2>IFFar - Programação I</h2><p>Professor Cristhiano Vasconcellos</p></header>
+<div class="container">
+  <h3>🤖 Robô com Condições - 5 Níveis</h3>
+  <div class="niveis" id="seletorNiveis"></div>
+  <div class="grid" id="grid"></div>
+  <div class="painel">
+    <div class="col-esquerda">
+      <div class="status"><span id="direcaoAtual">Direção: ➡️</span><span>Nível <span id="nivelAtual">1</span>/5</span></div>
+      <div id="comandosLista" class="comandos-display"></div>
+      <div class="controles">
+        <button id="btnAndar">➕ Andar</button>
+        <button id="btnVirar">🔄 Virar</button>
+        <button id="btnExecutar">▶ Executar</button>
+        <button id="btnPasso">⏯ Passo</button>
+        <button id="btnReiniciar">🔄 Reiniciar</button>
       </div>
     </div>
-
-    <div id="feedback"></div>
+    <div class="col-direita"><div class="pseudocodigo-titulo">📝 Pseudocódigo</div><pre id="pseudocodigo" style="margin:0;"></pre></div>
   </div>
+  <div id="feedback"></div>
+</div>
 
-  <script>
-    (function() {
-      // ========== CONFIGURAÇÃO DOS NÍVEIS (DIFICULDADE PROGRESSIVA) ==========
-      const niveis = [
-        { // Nível 1 - sem obstáculos (caminho livre)
-          nome: "Nível 1",
-          robot: { x: 0, y: 0 },
-          direcao: 'right',
-          goal: { x: 4, y: 4 },
-          obstacles: []
-        },
-        { // Nível 2 - obstáculo imediato na frente (exige virar primeiro)
-          nome: "Nível 2",
-          robot: { x: 0, y: 0 },
-          direcao: 'right',
-          goal: { x: 4, y: 4 },
-          obstacles: [{ x: 1, y: 0 }]
-        },
-        { // Nível 3 - dois obstáculos: um no início e outro perto do objetivo
-          nome: "Nível 3",
-          robot: { x: 0, y: 0 },
-          direcao: 'right',
-          goal: { x: 4, y: 4 },
-          obstacles: [{ x: 1, y: 0 }, { x: 2, y: 4 }]
-        },
-        { // Nível 4 - três obstáculos forçando um desvio mais longo
-          nome: "Nível 4",
-          robot: { x: 0, y: 0 },
-          direcao: 'right',
-          goal: { x: 4, y: 4 },
-          obstacles: [{ x: 1, y: 0 }, { x: 2, y: 4 }, { x: 3, y: 2 }]
-        },
-        { // Nível 5 - labirinto com caminho único (apenas uma rota possível)
-          nome: "Nível 5",
-          robot: { x: 0, y: 0 },
-          direcao: 'right',
-          goal: { x: 4, y: 4 },
-          obstacles: [
-            // Todos os blocos que não fazem parte do caminho planejado:
-            { x: 0, y: 3 }, { x: 0, y: 4 },
-            { x: 1, y: 0 }, { x: 1, y: 1 }, { x: 1, y: 4 },
-            { x: 2, y: 0 }, { x: 2, y: 1 }, { x: 2, y: 2 },
-            { x: 3, y: 0 }, { x: 3, y: 1 }, { x: 3, y: 2 }, { x: 3, y: 3 },
-            { x: 4, y: 0 }, { x: 4, y: 1 }, { x: 4, y: 2 }, { x: 4, y: 3 }
-          ]
-        }
-      ];
+<script>
+// ========== CONFIGURAÇÃO DOS NÍVEIS ==========
+const niveis = [
+  { nome:"Nível 1", robot:{x:0,y:0}, direcao:'right', goal:{x:4,y:4}, obstacles:[] },
+  { nome:"Nível 2", robot:{x:0,y:0}, direcao:'right', goal:{x:4,y:4}, obstacles:[{x:1,y:0}] },
+  { nome:"Nível 3", robot:{x:0,y:0}, direcao:'right', goal:{x:4,y:4}, obstacles:[{x:1,y:0},{x:2,y:4}] },
+  { nome:"Nível 4", robot:{x:0,y:0}, direcao:'right', goal:{x:4,y:4}, obstacles:[{x:1,y:0},{x:2,y:4},{x:3,y:2}] },
+  { nome:"Nível 5", robot:{x:0,y:0}, direcao:'right', goal:{x:4,y:4}, obstacles:[{x:0,y:3},{x:0,y:4},{x:1,y:0},{x:1,y:1},{x:1,y:4},{x:2,y:0},{x:2,y:1},{x:2,y:2},{x:3,y:0},{x:3,y:1},{x:3,y:2},{x:3,y:3},{x:4,y:0},{x:4,y:1},{x:4,y:2},{x:4,y:3}] }
+];
 
-      let nivelAtual = 0; // índice
-      let robot = { ...niveis[nivelAtual].robot };
-      let direcao = niveis[nivelAtual].direcao;
-      let goal = { ...niveis[nivelAtual].goal };
-      let obstacles = niveis[nivelAtual].obstacles.map(o => ({ ...o }));
+let nivelAtual = 0;
+let robot = {...niveis[nivelAtual].robot};
+let direcao = niveis[nivelAtual].direcao;
+let goal = {...niveis[nivelAtual].goal};
+let obstacles = niveis[nivelAtual].obstacles.map(o=>({...o}));
+let comandos = [];
+let animacaoTimeout = null;
+let jogoConcluido = false; // impede ações após concluir o último nível
 
-      let comandos = [];
-      let animacaoTimeout = null; // para controle da animação
+const URL_WEBAPP = "https://script.google.com/macros/s/AKfycbzoeygTm-R27yb8QOcdH0s7fViv6vGPQ5MtDuCgHBt3RhvFVQKlGxf3A7yQUR3RfRqFcw/exec";
+const NOME_ATIVIDADE = "Jogo do Robô";
 
-      // Elementos DOM
-      const gridEl = document.getElementById('grid');
-      const comandosListaEl = document.getElementById('comandosLista');
-      const direcaoAtualEl = document.getElementById('direcaoAtual');
-      const feedbackEl = document.getElementById('feedback');
-      const pseudocodigoEl = document.getElementById('pseudocodigo');
-      const nivelAtualEl = document.getElementById('nivelAtual');
-      const seletorNiveisEl = document.getElementById('seletorNiveis');
+function obterNomeAluno() {
+  let nome = sessionStorage.getItem("nomeAluno");
+  if (!nome) {
+    nome = prompt("Digite seu nome completo para registrar sua atividade:");
+    if (nome && nome.trim() !== "") sessionStorage.setItem("nomeAluno", nome.trim());
+    else nome = "Anônimo";
+  }
+  return nome;
+}
 
-      const btnAndar = document.getElementById('btnAndar');
-      const btnVirar = document.getElementById('btnVirar');
-      const btnExecutar = document.getElementById('btnExecutar');
-      const btnPasso = document.getElementById('btnPasso');
-      const btnReiniciar = document.getElementById('btnReiniciar');
+async function registrarResultado(nome, atividade, acertos, total) {
+  const dados = { nome, atividade, acertos, total };
+  try {
+    await fetch(URL_WEBAPP, { method:"POST", mode:"no-cors", headers:{"Content-Type":"application/json"}, body:JSON.stringify(dados) });
+    console.log("Registrado:", dados);
+  } catch(e) { console.error("Erro ao registrar:", e); }
+}
 
-      // ========== FUNÇÕES DE ATUALIZAÇÃO ==========
-      function atualizarDirecaoDisplay() {
-        const simbolos = { right: '➡️', down: '⬇️', left: '⬅️', up: '⬆️' };
-        direcaoAtualEl.innerText = `Direção: ${simbolos[direcao]}`;
-      }
+function concluirJogo() {
+  if (jogoConcluido) return;
+  jogoConcluido = true;
+  const nome = obterNomeAluno();
+  registrarResultado(nome, NOME_ATIVIDADE, 5, 5);
+  document.getElementById('feedback').innerHTML = "🏆 Parabéns! Você completou todos os níveis! 🏆<br>Seu progresso foi registrado.";
+  // Desabilitar todos os botões de controle
+  const botoes = ['btnAndar', 'btnVirar', 'btnExecutar', 'btnPasso', 'btnReiniciar'];
+  botoes.forEach(id => document.getElementById(id).disabled = true);
+  // Desabilitar seletor de níveis também
+  document.querySelectorAll('.btn-nivel').forEach(btn => btn.disabled = true);
+}
 
-      function atualizarListaComandos(destacarIndice = -1) {
-        if (comandos.length === 0) {
-          comandosListaEl.innerHTML = '<span style="color: #6b7280;">Nenhum comando</span>';
-          return;
-        }
-        let html = '';
-        comandos.forEach((cmd, idx) => {
-          const ativo = (idx === destacarIndice) ? 'ativo' : '';
-          html += `<span class="comando-tag ${ativo}">${cmd === 'andar' ? '➡️ Andar' : '🔄 Virar'}</span>`;
-        });
-        comandosListaEl.innerHTML = html;
-      }
-
-      // Desenha o grid
-      function criarGrid() {
-        gridEl.innerHTML = '';
-        for (let y = 0; y < 5; y++) {
-          for (let x = 0; x < 5; x++) {
-            const cell = document.createElement('div');
-            cell.classList.add('cell');
-
-            if (obstacles.some(o => o.x === x && o.y === y)) {
-              cell.classList.add('obstacle');
-              cell.textContent = '⛔';
-            }
-            else if (goal.x === x && goal.y === y) {
-              cell.classList.add('goal');
-              cell.textContent = '🏁';
-            }
-
-            if (robot.x === x && robot.y === y) {
-              cell.classList.add('robot');
-              cell.setAttribute('data-direcao', direcao);
-              cell.textContent = '';
-            }
-
-            gridEl.appendChild(cell);
-          }
-        }
-        atualizarDirecaoDisplay();
-      }
-
-      // Gera pseudocódigo baseado nos comandos
-      function gerarPseudocodigo() {
-        let codigo = 'algoritmo "Robo_no_Labirinto"\n';
-        codigo += 'var\n';
-        codigo += '// Comandos programados\n';
-        codigo += 'inicio\n';
-        if (comandos.length === 0) {
-          codigo += '   // Nenhum comando\n';
-        } else {
-          comandos.forEach((cmd, i) => {
-            if (cmd === 'andar') {
-              codigo += `   andar()  // Passo ${i+1}\n`;
-            } else {
-              codigo += `   virar()  // Passo ${i+1}\n`;
-            }
-          });
-        }
-        codigo += 'fimalgoritmo\n';
-        codigo += '\n// Procedimentos (definidos abaixo)\n';
-        codigo += 'procedimento andar()\n';
-        codigo += '   // Move o robô para frente\n';
-        codigo += 'fimprocedimento\n\n';
-        codigo += 'procedimento virar()\n';
-        codigo += '   // Gira 90° para direita\n';
-        codigo += 'fimprocedimento\n';
-        pseudocodigoEl.innerText = codigo;
-      }
-
-      // Verifica vitória
-      function verificarVitoria() {
-        const venceu = (robot.x === goal.x && robot.y === goal.y);
-        feedbackEl.innerHTML = venceu ? '✅ Chegou ao objetivo!' : '❌ Ainda não chegou.';
-        return venceu;
-      }
-
-      // Atualiza estado dos botões (considerando animação)
-      function atualizarBotoes(desabilitar = false, animando = false) {
-        const venceu = (robot.x === goal.x && robot.y === goal.y);
-        const programado = comandos.length > 0;
-        btnAndar.disabled = venceu || animando;
-        btnVirar.disabled = venceu || animando;
-        btnExecutar.disabled = venceu || !programado || animando;
-        btnPasso.disabled = venceu || !programado || animando;
-        btnReiniciar.disabled = animando; // pode reiniciar mesmo durante animação? Melhor desabilitar para evitar conflitos
-      }
-
-      // ========== LÓGICA DE MOVIMENTO ==========
-      function mover() {
-        let nx = robot.x;
-        let ny = robot.y;
-
-        switch (direcao) {
-          case 'right': nx++; break;
-          case 'left': nx--; break;
-          case 'up': ny--; break;
-          case 'down': ny++; break;
-        }
-
-        if (nx < 0 || ny < 0 || nx >= 5 || ny >= 5) return false;
-        if (obstacles.some(o => o.x === nx && o.y === ny)) return false;
-
-        robot.x = nx;
-        robot.y = ny;
-        return true;
-      }
-
-      function virarDireita() {
-        const ordem = ['right', 'down', 'left', 'up'];
-        let i = ordem.indexOf(direcao);
-        direcao = ordem[(i + 1) % 4];
-      }
-
-      // ========== EXECUÇÃO DE COMANDOS ==========
-      function executarPasso() {
-        if (comandos.length === 0) return false;
-
-        const cmd = comandos.shift();
-        // Destacar o comando sendo executado (antes de remover, o índice 0)
-        atualizarListaComandos(0); // destaca o primeiro
-
-        if (cmd === 'andar') mover();
-        else if (cmd === 'virar') virarDireita();
-
-        criarGrid();
-        const venceu = verificarVitoria();
-        atualizarListaComandos(); // remove destaque após execução
-        gerarPseudocodigo();
-        atualizarBotoes(venceu, false);
-        return true;
-      }
-
-      // Animação passo a passo
-      function executarAnimacao() {
-        if (comandos.length === 0) {
-          atualizarBotoes(false, false);
-          return;
-        }
-
-        // Desabilita botões durante animação
-        atualizarBotoes(false, true);
-
-        function passoAnimado() {
-          if (comandos.length === 0) {
-            atualizarBotoes(robot.x === goal.x && robot.y === goal.y, false);
-            return;
-          }
-
-          const cmd = comandos.shift();
-          // Destacar o comando atual (índice 0 antes de remover)
-          atualizarListaComandos(0);
-
-          if (cmd === 'andar') mover();
-          else virarDireita();
-
-          criarGrid();
-          verificarVitoria();
-          gerarPseudocodigo();
-
-          // Após um pequeno atraso, remove o destaque e continua
-          setTimeout(() => {
-            atualizarListaComandos(); // remove destaque
-            if (comandos.length > 0 && !(robot.x === goal.x && robot.y === goal.y)) {
-              // Continua animação
-              animacaoTimeout = setTimeout(passoAnimado, 400);
-            } else {
-              // Terminou
-              atualizarBotoes(robot.x === goal.x && robot.y === goal.y, false);
-            }
-          }, 200);
-        }
-
-        // Inicia o primeiro passo
-        passoAnimado();
-      }
-
-      // ========== GERENCIAMENTO DE NÍVEIS ==========
-      function carregarNivel(index) {
-        if (animacaoTimeout) {
-          clearTimeout(animacaoTimeout);
-          animacaoTimeout = null;
-        }
-        nivelAtual = index;
-        const nivel = niveis[nivelAtual];
-        robot = { ...nivel.robot };
-        direcao = nivel.direcao;
-        goal = { ...nivel.goal };
-        obstacles = nivel.obstacles.map(o => ({ ...o }));
-        comandos = [];
-        criarGrid();
-        feedbackEl.innerHTML = '';
-        atualizarListaComandos();
-        gerarPseudocodigo();
-        atualizarBotoes(false, false);
-        nivelAtualEl.innerText = nivelAtual + 1;
-
-        // Marcar botão ativo
-        document.querySelectorAll('.btn-nivel').forEach((btn, i) => {
-          btn.classList.toggle('ativo', i === nivelAtual);
-        });
-      }
-
-      function reiniciarNivel() {
-        if (animacaoTimeout) {
-          clearTimeout(animacaoTimeout);
-          animacaoTimeout = null;
-        }
-        const nivel = niveis[nivelAtual];
-        robot = { ...nivel.robot };
-        direcao = nivel.direcao;
-        goal = { ...nivel.goal };
-        obstacles = nivel.obstacles.map(o => ({ ...o }));
-        comandos = [];
-        criarGrid();
-        feedbackEl.innerHTML = '';
-        atualizarListaComandos();
-        gerarPseudocodigo();
-        atualizarBotoes(false, false);
-      }
-
-      // ========== CONSTRUIR SELETOR DE NÍVEIS ==========
-      function construirSeletor() {
-        seletorNiveisEl.innerHTML = '';
-        niveis.forEach((nivel, idx) => {
-          const btn = document.createElement('button');
-          btn.className = 'btn-nivel' + (idx === nivelAtual ? ' ativo' : '');
-          btn.textContent = nivel.nome;
-          btn.addEventListener('click', () => carregarNivel(idx));
-          seletorNiveisEl.appendChild(btn);
-        });
-      }
-
-      // ========== EVENT LISTENERS ==========
-      btnAndar.addEventListener('click', () => {
-        comandos.push('andar');
-        atualizarListaComandos();
-        gerarPseudocodigo();
-        atualizarBotoes(false, false);
-      });
-
-      btnVirar.addEventListener('click', () => {
-        comandos.push('virar');
-        atualizarListaComandos();
-        gerarPseudocodigo();
-        atualizarBotoes(false, false);
-      });
-
-      btnExecutar.addEventListener('click', () => {
-        if (comandos.length === 0) return;
-        executarAnimacao();
-      });
-
-      btnPasso.addEventListener('click', () => {
-        if (comandos.length === 0) return;
-        executarPasso();
-      });
-
-      btnReiniciar.addEventListener('click', reiniciarNivel);
-
-      // ========== INICIALIZAÇÃO ==========
-      construirSeletor();
-      carregarNivel(0); // carrega primeiro nível
-    })();
-  </script>
+// ----- funções do jogo -----
+function atualizarDirecaoDisplay() {
+  const simbolos = { right:'➡️', down:'⬇️', left:'⬅️', up:'⬆️' };
+  document.getElementById('direcaoAtual').innerText = `Direção: ${simbolos[direcao]}`;
+}
+function atualizarListaComandos(destacarIndice=-1) {
+  const container = document.getElementById('comandosLista');
+  if (!comandos.length) { container.innerHTML = '<span style="color:#6b7280;">Nenhum comando</span>'; return; }
+  let html = '';
+  comandos.forEach((cmd,idx) => { html += `<span class="comando-tag ${idx===destacarIndice?'ativo':''}">${cmd==='andar'?'➡️ Andar':'🔄 Virar'}</span>`; });
+  container.innerHTML = html;
+}
+function criarGrid() {
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  for(let y=0;y<5;y++) for(let x=0;x<5;x++) {
+    const cell = document.createElement('div');
+    cell.className = 'cell';
+    if(obstacles.some(o=>o.x===x && o.y===y)) cell.classList.add('obstacle'), cell.textContent='⛔';
+    else if(goal.x===x && goal.y===y) cell.classList.add('goal'), cell.textContent='🏁';
+    if(robot.x===x && robot.y===y) cell.classList.add('robot'), cell.setAttribute('data-direcao',direcao);
+    grid.appendChild(cell);
+  }
+  atualizarDirecaoDisplay();
+}
+function gerarPseudocodigo() {
+  let codigo = 'algoritmo "Robo_no_Labirinto"\nvar\ninicio\n';
+  if(comandos.length) comandos.forEach((cmd,i)=>codigo+=`   ${cmd==='andar'?'andar()':'virar()'}  // Passo ${i+1}\n`);
+  else codigo += '   // Nenhum comando\n';
+  codigo += 'fimalgoritmo\n\nprocedimento andar()\n   // Move robô\nfimprocedimento\n\nprocedimento virar()\n   // Gira 90°\nfimprocedimento';
+  document.getElementById('pseudocodigo').innerText = codigo;
+}
+function verificarVitoria() {
+  const venceu = robot.x===goal.x && robot.y===goal.y;
+  if (venceu) {
+    document.getElementById('feedback').innerHTML = '✅ Chegou ao objetivo!';
+    // Se for nível 5 e não concluiu ainda, concluir jogo
+    if (nivelAtual === 4 && !jogoConcluido) {
+      concluirJogo();
+    }
+  } else {
+    document.getElementById('feedback').innerHTML = '❌ Ainda não chegou.';
+  }
+  return venceu;
+}
+function mover() {
+  let nx=robot.x, ny=robot.y;
+  switch(direcao){ case 'right': nx++; break; case 'left': nx--; break; case 'up': ny--; break; case 'down': ny++; break; }
+  if(nx<0||ny<0||nx>=5||ny>=5) return false;
+  if(obstacles.some(o=>o.x===nx && o.y===ny)) return false;
+  robot.x=nx; robot.y=ny; return true;
+}
+function virarDireita() { const ordem=['right','down','left','up']; direcao=ordem[(ordem.indexOf(direcao)+1)%4]; }
+function executarPasso() {
+  if(jogoConcluido) return false;
+  if(!comandos.length) return false;
+  const cmd = comandos.shift();
+  atualizarListaComandos(0);
+  if(cmd==='andar') mover(); else virarDireita();
+  criarGrid(); verificarVitoria(); atualizarListaComandos(); gerarPseudocodigo();
+  return true;
+}
+function executarAnimacao() {
+  if(jogoConcluido) return;
+  if(!comandos.length) return;
+  function passoAnimado() {
+    if(!comandos.length) return;
+    const cmd = comandos.shift();
+    atualizarListaComandos(0);
+    if(cmd==='andar') mover(); else virarDireita();
+    criarGrid(); verificarVitoria(); gerarPseudocodigo();
+    setTimeout(()=>{ atualizarListaComandos(); if(comandos.length && !(robot.x===goal.x&&robot.y===goal.y) && !jogoConcluido) animacaoTimeout = setTimeout(passoAnimado,400); },200);
+  }
+  passoAnimado();
+}
+function carregarNivel(index) {
+  if(jogoConcluido) return;
+  if(animacaoTimeout) clearTimeout(animacaoTimeout);
+  nivelAtual = index;
+  const nivel = niveis[nivelAtual];
+  robot = {...nivel.robot}; direcao = nivel.direcao; goal = {...nivel.goal}; obstacles = nivel.obstacles.map(o=>({...o}));
+  comandos = [];
+  criarGrid(); document.getElementById('feedback').innerHTML = '';
+  atualizarListaComandos(); gerarPseudocodigo(); 
+  document.getElementById('nivelAtual').innerText = nivelAtual+1;
+  document.querySelectorAll('.btn-nivel').forEach((btn,i)=>btn.classList.toggle('ativo',i===nivelAtual));
+  // Reativar botões se não estiver concluído
+  const botoes = ['btnAndar', 'btnVirar', 'btnExecutar', 'btnPasso', 'btnReiniciar'];
+  botoes.forEach(id => document.getElementById(id).disabled = false);
+}
+function reiniciarNivel() { carregarNivel(nivelAtual); }
+function construirSeletor() {
+  const seletor = document.getElementById('seletorNiveis');
+  seletor.innerHTML = '';
+  niveis.forEach((nivel,idx)=>{
+    const btn = document.createElement('button');
+    btn.className = 'btn-nivel' + (idx===nivelAtual?' ativo':'');
+    btn.textContent = nivel.nome;
+    btn.addEventListener('click',()=>carregarNivel(idx));
+    seletor.appendChild(btn);
+  });
+}
+document.getElementById('btnAndar').addEventListener('click',()=>{ if(!jogoConcluido) { comandos.push('andar'); atualizarListaComandos(); gerarPseudocodigo(); } });
+document.getElementById('btnVirar').addEventListener('click',()=>{ if(!jogoConcluido) { comandos.push('virar'); atualizarListaComandos(); gerarPseudocodigo(); } });
+document.getElementById('btnExecutar').addEventListener('click',()=>{ if(!jogoConcluido && comandos.length) executarAnimacao(); });
+document.getElementById('btnPasso').addEventListener('click',()=>{ if(!jogoConcluido && comandos.length) executarPasso(); });
+document.getElementById('btnReiniciar').addEventListener('click',reiniciarNivel);
+construirSeletor(); carregarNivel(0);
+</script>
 </body>
 </html>

@@ -1,123 +1,215 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Monte o Algoritmo</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Monte o Algoritmo - Programação I</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f6f8;
+    * {
       margin: 0;
-      padding: 20px;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #0b0f1a;
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
 
     header {
-      text-align: center;
-      margin-bottom: 10px;
+      background: #111827;
+      border-bottom: 2px solid #22c55e;
+      padding: 1rem 2rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
     }
-
-    header h1 { margin: 5px; }
-    header p { margin: 2px; font-weight: bold; }
-
-    #pontuacao {
-      margin-top: 5px;
-      font-size: 18px;
-      color: #333;
+    .logo-area h2 {
+      font-size: 1.4rem;
+      font-weight: 600;
+    }
+    .logo-area p {
+      font-size: 0.85rem;
+      color: #9ca3af;
+    }
+    .pontuacao {
+      background: rgba(34, 197, 94, 0.15);
+      padding: 6px 14px;
+      border-radius: 40px;
+      font-weight: bold;
+      border: 1px solid rgba(34, 197, 94, 0.3);
     }
 
     .container {
+      flex: 1;
       display: flex;
-      gap: 20px;
       flex-wrap: wrap;
       justify-content: center;
+      gap: 2rem;
+      padding: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
     }
 
-    .box {
-      background: white;
-      padding: 15px;
-      border-radius: 10px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-      width: 300px;
-      min-height: 300px;
+    .card {
+      background: rgba(17, 24, 39, 0.8);
+      backdrop-filter: blur(8px);
+      border-radius: 24px;
+      padding: 1.5rem;
+      width: 320px;
+      min-height: 400px;
+      border: 1px solid rgba(34, 197, 94, 0.2);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    }
+    .card h2 {
+      text-align: center;
+      margin-bottom: 1rem;
+      font-size: 1.5rem;
+      color: #22c55e;
     }
 
-    .box h2 { text-align: center; }
-
-    .item {
-      background: #4CAF50;
-      color: white;
-      padding: 10px;
-      margin: 5px 0;
-      border-radius: 5px;
+    /* Blocos (itens arrastáveis) */
+    .bloco {
+      background: #22c55e;
+      color: #000;
+      font-weight: bold;
+      padding: 12px;
+      margin: 8px 0;
+      border-radius: 12px;
+      text-align: center;
       cursor: grab;
-      text-align: center;
+      transition: 0.1s;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      user-select: none;
+    }
+    .bloco:active {
+      cursor: grabbing;
     }
 
+    /* Área de destino (dropzone) – garante empilhamento vertical */
     .dropzone {
-      border: 2px dashed #ccc;
-      min-height: 200px;
-      padding: 10px;
+      min-height: 300px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 16px;
+      padding: 12px;
+      border: 2px dashed rgba(34, 197, 94, 0.5);
+      transition: background 0.2s;
+      display: block;        /* importante: não usar flex */
+    }
+    .dropzone .bloco {
+      cursor: default;
+      background: #1f2937;
+      color: #fff;
+      border-left: 4px solid #22c55e;
+    }
+    .dropzone .bloco:active {
+      cursor: default;
     }
 
-    button {
-      margin: 10px;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 5px;
-      background: #007BFF;
-      color: white;
-      font-size: 16px;
-      cursor: pointer;
+    /* Área dos blocos originais também com empilhamento vertical */
+    #blocos-origem {
+      display: block;
     }
 
-    .controls { text-align: center; }
-
-    #resultado {
+    .enunciado {
       text-align: center;
-      font-size: 18px;
-      margin-top: 10px;
+      font-size: 1.2rem;
+      margin: 1rem auto 0;
+      background: #111827;
+      padding: 12px;
+      border-radius: 30px;
+      max-width: 90%;
+      border-left: 4px solid #22c55e;
+    }
+
+    .controles {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin: 1.5rem 0;
+      flex-wrap: wrap;
+    }
+    button {
+      background: #22c55e;
+      border: none;
+      color: #000;
+      font-weight: bold;
+      padding: 10px 20px;
+      border-radius: 40px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: 0.1s;
+      box-shadow: 0 2px 0 #15803d;
+    }
+    button:active {
+      transform: translateY(2px);
+      box-shadow: 0 0 0 #15803d;
+    }
+    button:disabled {
+      opacity: 0.5;
+      transform: none;
+      cursor: not-allowed;
+    }
+    .feedback {
+      text-align: center;
+      font-size: 1.1rem;
+      margin: 10px;
+      padding: 8px;
+    }
+    footer {
+      text-align: center;
+      padding: 1rem;
+      font-size: 0.75rem;
+      color: #6b7280;
+      border-top: 1px solid rgba(34, 197, 94, 0.2);
+      margin-top: auto;
     }
   </style>
 </head>
 <body>
-
 <header>
-  <h1>Monte o Algoritmo</h1>
-  <p>IFFar - Programação I</p>
-  <p>Professor Cristhiano Vasconcellos</p>
-  <div id="pontuacao">Pontuação: 0</div>
+  <div class="logo-area">
+    <h2>IFFar - Programação I</h2>
+    <p>Professor Cristhiano Vasconcellos</p>
+  </div>
+  <div class="pontuacao" id="pontuacao">Pontuação: 0</div>
 </header>
 
-<p style="text-align:center" id="enunciado"></p>
+<div class="enunciado" id="enunciado"></div>
 
 <div class="container">
-  <div class="box">
-    <h2>Blocos</h2>
-    <div id="blocos"></div>
+  <div class="card">
+    <h2>📦 Blocos</h2>
+    <div id="blocos-origem" class="dropzone" style="border: none; background: none; padding: 0;"></div>
   </div>
-
-  <div class="box">
-    <h2>Seu Algoritmo</h2>
+  <div class="card">
+    <h2>🧩 Seu Algoritmo</h2>
     <div id="dropzone" class="dropzone"></div>
   </div>
 </div>
 
-<div class="controls">
-  <button onclick="verificar()">Verificar</button>
-  <button onclick="proximo()">Próximo</button>
-  <button onclick="reiniciar()">Reiniciar</button>
+<div class="controles">
+  <button id="verificarBtn">✅ Verificar</button>
+  <button id="proximoBtn">⏩ Próximo</button>
+  <button id="reiniciarBtn">🔄 Reiniciar</button>
+  <button id="finalizarBtn" style="background:#dc3545; box-shadow:0 2px 0 #b91c1c;">📥 Finalizar e Registrar</button>
 </div>
-
-<div id="resultado"></div>
+<div id="feedback" class="feedback"></div>
+<footer>Arraste os blocos para a área da direita na ordem correta</footer>
 
 <script>
+  // ---------- DADOS DOS DESAFIOS ----------
   const desafios = [
     { enunciado: 'Peça um número e diga se é maior que 10', blocos: ['leia numero','se numero > 10 então','escreva "Maior que 10"','fimse'], resposta: ['leia numero','se numero > 10 então','escreva "Maior que 10"','fimse'] },
     { enunciado: 'Peça um número e diga se é par', blocos: ['leia numero','se numero % 2 == 0 então','escreva "Par"','fimse'], resposta: ['leia numero','se numero % 2 == 0 então','escreva "Par"','fimse'] },
     { enunciado: 'Peça um número e diga se é positivo', blocos: ['leia numero','se numero > 0 então','escreva "Positivo"','fimse'], resposta: ['leia numero','se numero > 0 então','escreva "Positivo"','fimse'] },
     { enunciado: 'Peça dois números e mostre a soma', blocos: ['leia a','leia b','soma = a + b','escreva soma'], resposta: ['leia a','leia b','soma = a + b','escreva soma'] },
-    { enunciado: 'Peça um número e diga se é menor que 0', blocos: ['leia numero','se numero < 0 então','escreva "Negativo"','fimse'], resposta: ['leia numero','se numero < 0 então','escreva "Negativo"','fimse'] },
+    { enunciado: 'Peça um número e diga se é negativo', blocos: ['leia numero','se numero < 0 então','escreva "Negativo"','fimse'], resposta: ['leia numero','se numero < 0 então','escreva "Negativo"','fimse'] },
     { enunciado: 'Peça um número e mostre o dobro', blocos: ['leia numero','dobro = numero * 2','escreva dobro'], resposta: ['leia numero','dobro = numero * 2','escreva dobro'] },
     { enunciado: 'Peça um número e diga se é igual a 5', blocos: ['leia numero','se numero == 5 então','escreva "Igual a 5"','fimse'], resposta: ['leia numero','se numero == 5 então','escreva "Igual a 5"','fimse'] },
     { enunciado: 'Peça um número e mostre seu quadrado', blocos: ['leia numero','quadrado = numero * numero','escreva quadrado'], resposta: ['leia numero','quadrado = numero * numero','escreva quadrado'] },
@@ -126,72 +218,122 @@
   ];
 
   let atual = 0;
-  let dragged = null;
   let pontos = 0;
   let acertou = false;
+  let dragged = null;
+
+  const URL_WEBAPP = "https://script.google.com/macros/s/AKfycbzoeygTm-R27yb8QOcdH0s7fViv6vGPQ5MtDuCgHBt3RhvFVQKlGxf3A7yQUR3RfRqFcw/exec";
+  const NOME_ATIVIDADE = "Monte os Blocos";
+
+  // ---------- FUNÇÕES AUXILIARES ----------
+  function obterNomeAluno() {
+    let nome = sessionStorage.getItem("nomeAluno");
+    if (!nome) {
+      nome = prompt("Digite seu nome completo para registrar sua atividade:");
+      if (nome && nome.trim() !== "") sessionStorage.setItem("nomeAluno", nome.trim());
+      else nome = "Anônimo";
+    }
+    return nome;
+  }
+
+  async function registrarResultado(nome, atividade, acertos, total) {
+    const dados = { nome, atividade, acertos, total };
+    try {
+      await fetch(URL_WEBAPP, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(dados)
+      });
+      alert(`✅ Registro enviado!\nNome: ${nome}\nAcertos: ${acertos}/${total}`);
+    } catch (e) {
+      console.error(e);
+      alert("❌ Erro ao enviar registro. Tente novamente mais tarde.");
+    }
+  }
 
   function atualizarPontuacao() {
-    document.getElementById('pontuacao').innerText = 'Pontuação: ' + pontos;
+    document.getElementById('pontuacao').innerText = `Pontuação: ${pontos}`;
   }
 
   function embaralhar(array) {
-    return array.sort(() => Math.random() - 0.5);
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
   }
 
+  // Cria um bloco arrastável
+  function criarBloco(texto, isOrigem = true) {
+    const div = document.createElement('div');
+    div.className = 'bloco';
+    div.innerText = texto;
+    if (isOrigem) {
+      div.draggable = true;
+      div.addEventListener('dragstart', (e) => {
+        dragged = div;
+        e.dataTransfer.setData('text/plain', texto);
+      });
+    } else {
+      div.draggable = false;
+    }
+    return div;
+  }
+
+  // Recarrega a questão atual
   function carregar() {
     const desafio = desafios[atual];
     document.getElementById('enunciado').innerText = desafio.enunciado;
 
-    const blocosDiv = document.getElementById('blocos');
-    const dropzone = document.getElementById('dropzone');
+    const origemDiv = document.getElementById('blocos-origem');
+    const dropDiv = document.getElementById('dropzone');
 
-    blocosDiv.innerHTML = '';
-    dropzone.innerHTML = '';
-    document.getElementById('resultado').innerHTML = '';
+    origemDiv.innerHTML = '';
+    dropDiv.innerHTML = '';
 
     acertou = false;
+    document.getElementById('feedback').innerHTML = '';
 
-    embaralhar([...desafio.blocos]).forEach(texto => {
-      const div = document.createElement('div');
-      div.className = 'item';
-      div.draggable = true;
-      div.innerText = texto;
-
-      div.addEventListener('dragstart', () => dragged = div);
-
-      blocosDiv.appendChild(div);
+    // Embaralha os blocos da origem e adiciona
+    const blocosEmbaralhados = embaralhar([...desafio.blocos]);
+    blocosEmbaralhados.forEach(texto => {
+      origemDiv.appendChild(criarBloco(texto, true));
     });
   }
 
-  document.getElementById('dropzone').addEventListener('dragover', e => e.preventDefault());
-
-  document.getElementById('dropzone').addEventListener('drop', () => {
+  // Eventos de drag and drop na dropzone
+  const dropzone = document.getElementById('dropzone');
+  dropzone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+  });
+  dropzone.addEventListener('drop', (e) => {
+    e.preventDefault();
     if (dragged) {
-      const clone = dragged.cloneNode(true);
-      clone.addEventListener('dragstart', () => dragged = clone);
-      document.getElementById('dropzone').appendChild(clone);
+      const clone = criarBloco(dragged.innerText, false);
+      dropzone.appendChild(clone);
+      // Remove o bloco original da origem
+      dragged.remove();
+      dragged = null;
     }
   });
 
+  // Verifica a ordem dos blocos na dropzone
   function verificar() {
-    const respostaUsuario = Array.from(document.getElementById('dropzone').children).map(e => e.innerText);
+    const dropDiv = document.getElementById('dropzone');
+    const respostaUsuario = Array.from(dropDiv.children).map(el => el.innerText);
     const correta = desafios[atual].resposta;
-
-    const resultado = document.getElementById('resultado');
+    const feedback = document.getElementById('feedback');
 
     if (JSON.stringify(respostaUsuario) === JSON.stringify(correta)) {
-      resultado.innerHTML = '✅ Correto!';
-      resultado.style.color = 'green';
-
+      feedback.innerHTML = '<span style="color:#4caf50;">✅ Correto! Parabéns.</span>';
       if (!acertou) {
         pontos++;
         atualizarPontuacao();
         acertou = true;
       }
-
     } else {
-      resultado.innerHTML = '❌ Tente novamente!';
-      resultado.style.color = 'red';
+      feedback.innerHTML = '<span style="color:#ff5252;">❌ Ordem incorreta! Tente novamente arrumando os blocos.</span>';
     }
   }
 
@@ -207,9 +349,20 @@
     carregar();
   }
 
+  function finalizar() {
+    const nome = obterNomeAluno();
+    registrarResultado(nome, NOME_ATIVIDADE, pontos, desafios.length);
+  }
+
+  // Conecta os botões
+  document.getElementById('verificarBtn').addEventListener('click', verificar);
+  document.getElementById('proximoBtn').addEventListener('click', proximo);
+  document.getElementById('reiniciarBtn').addEventListener('click', reiniciar);
+  document.getElementById('finalizarBtn').addEventListener('click', finalizar);
+
+  // Inicializa
   atualizarPontuacao();
   carregar();
 </script>
-
 </body>
 </html>
