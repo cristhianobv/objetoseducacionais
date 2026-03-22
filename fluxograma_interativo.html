@@ -226,10 +226,10 @@ const questoesBase = [
   },
   { // 5 - Laço enquanto (contagem)
     diagrama: `graph TD
-      A[Início] --> B[x igual a 1]
+      A[Início] --> B[x recebe 1]
       B --> C{x menor ou igual a 5}
       C -->|Sim| D[Escreva x]
-      D --> E[x igual a x mais 1]
+      D --> E[x recebe x mais 1]
       E --> C
       C -->|Não| F[Fim]`,
     codigos: [
@@ -272,7 +272,7 @@ const questoesBase = [
   { // 8 - Classificação com zero
     diagrama: `graph TD
       A[Início] --> B[Leia num]
-      B --> C{num igual a 0}
+      B --> C{num recebe 0}
       C -->|Sim| D[Escreva Zero]
       C -->|Não| E{num maior que 0}
       E -->|Sim| F[Escreva Positivo]
