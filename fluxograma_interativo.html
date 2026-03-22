@@ -198,7 +198,7 @@ const questoesBase = [
   { // 3 - Par ou Ímpar
     diagrama: `graph TD
       A[Início] --> B[Leia num]
-      B --> C{resto da divisao por 2 igual a 0}
+      B --> C{resto da divisao de num por 2 é igual a 0?}
       C -->|Sim| D[Escreva Par]
       C -->|Não| E[Escreva Ímpar]
       D --> F[Fim]
@@ -212,7 +212,7 @@ const questoesBase = [
   { // 4 - Média
     diagrama: `graph TD
       A[Início] --> B[Leia a, b, c]
-      B --> C[media igual a a mais b mais c dividido por 3]
+      B --> C[media igual o resultado da soma de a, b, c  dividido por 3]
       C --> D{media maior ou igual a 6}
       D -->|Sim| E[Aprovado]
       D -->|Não| F[Reprovado]
@@ -231,7 +231,8 @@ const questoesBase = [
       C -->|Sim| D[Escreva x]
       D --> E[x recebe x mais 1]
       E --> C
-      C -->|Não| F[Fim]`,
+      C -->|Não| 
+      F[Fim]`,
     codigos: [
       "algoritmo \"Contagem\"\nvar\n   x: inteiro\ninicio\n   x <- 1\n   enquanto x <= 5 faca\n      escreva(x)\n      x <- x + 1\n   fimenquanto\nfimalgoritmo",
       "algoritmo \"Contagem\"\nvar\n   x: inteiro\ninicio\n   x <- 1\n   repita\n      escreva(x)\n      x <- x + 1\n   ate x = 5\nfimalgoritmo"
