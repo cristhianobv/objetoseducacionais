@@ -177,6 +177,28 @@
       backdrop-filter: blur(4px);
       position: relative;
       z-index: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .footer-email {
+      font-size: 0.85rem;
+      color: #9ca3af;
+    }
+    .footer-email a {
+      color: #22c55e;
+      text-decoration: none;
+      font-weight: 500;
+      transition: opacity 0.2s;
+      border-bottom: 1px dashed rgba(34, 197, 94, 0.5);
+    }
+    .footer-email a:hover {
+      opacity: 0.8;
+      border-bottom-color: #22c55e;
+    }
+    .footer-email i {
+      margin-right: 6px;
+      color: #22c55e;
     }
 
     @media (max-width: 700px) {
@@ -253,7 +275,15 @@
 </div>
 
 <footer>
-  <i class="fas fa-graduation-cap"></i> IFFar - Programação I | Todos os objetos são interativos e registram seu progresso
+  <div>
+    <i class="fas fa-graduation-cap"></i> IFFar - Programação I | Todos os objetos são interativos e registram seu progresso
+  </div>
+  <div class="footer-email">
+    <i class="fas fa-envelope"></i> Contato: 
+    <a href="mailto:cristhiano.vasconcellos@iffarroupilha.edu.br">
+      cristhiano.vasconcellos@iffarroupilha.edu.br
+    </a>
+  </div>
 </footer>
 
 </body>
