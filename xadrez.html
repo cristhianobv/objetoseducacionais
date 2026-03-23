@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>Xadrez Interativo - Desafios - Programação I</title>
+
+  <!-- Arquivos locais -->
+  <link rel="stylesheet" href="css/chessboard.min.css">
+  <script src="js/jquery.min.js"></script>
+  <script src="js/chess.min.js"></script>
+  <script src="js/chessboard.min.js"></script>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: 'Segoe UI', 'Inter', system-ui, sans-serif;
+      background: linear-gradient(135deg, #0b0f1a 0%, #111827 100%);
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background-image: radial-gradient(rgba(34, 197, 94, 0.03) 1px, transparent 1px);
+      background-size: 24px 24px;
+      pointer-events: none;
+      z-index: 0;
+    }
+    header {
+      background: rgba(17, 24, 39, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(34, 197, 94, 0.3);
+      padding: 1rem 2rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 2;
+      position: relative;
+    }
+    .logo-area h2 { font-size:1.4rem; font-weight:600; }
+    .logo-area h2 i { color:#22c55e; margin-right:8px; }
+    .logo-area p { font-size:0.85rem; color:#9ca3af; margin-top:4px; }
+    .badge {
+      background: rgba(34,197,94,0.15);
+      border-radius:40px;
+      padding:6px 14px;
+      font-size:0.8rem;
+      border:1px solid rgba(34,197,94,0.3);
+    }
+    .container {
+      flex:1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 2rem;
+      z-index: 1;
+      position: relative;
+    }
+    .card {
+      background: rgba(17,24,39,0.7);
+      backdrop-filter: blur(16px);
+      border-radius: 32px;
+      padding: 2rem;
+      text-align: center;
+      border: 1px solid rgba(34,197,94,0.2);
+      box-shadow: 0 25px 40px -12px rgba(0,0,0,0.5);
+      max-width: 650px;
+      width: 100%;
+    }
+    .card h1 {
+      font-size:1.8rem;
+      font-weight:700;
+      background: linear-gradient(135deg,#fff,#22c55e);
+      -webkit-background-clip:text;
+      background-clip:text;
+      color:transparent;
+      margin-bottom:0.5rem;
+    }
+    .score-board {
+      display:flex;
+      justify-content:space-between;
+      background:#111827;
+      border-radius:40px;
+      padding:8px 20px;
+      margin-bottom:20px;
+      font-weight:bold;
+    }
+    #board {
+      width:100%;
+      max-width:450px;
+      margin:20px auto;
+    }
+    #status {
+      margin:15px 0;
+      padding:10px;
+      background:#111827;
+      border-radius:30px;
+      font-size:1rem;
+      color:#cbd5e1;
+      border-left:4px solid #22c55e;
+    }
+    button {
+      background:#22c55e;
+      border:none;
+      color:#000;
+      font-weight:bold;
+      padding:10px 20px;
+      border-radius:40px;
+      cursor:pointer;
+      font-size:0.9rem;
+      transition:0.1s;
+      box-shadow:0 2px 0 #15803d;
+      margin:5px;
+    }
+    button:active { transform:translateY(2px); box-shadow:0 0 0 #15803d; }
+    button:disabled { opacity:0.5; transform:none; cursor:not-allowed; }
+    .btn-secondary { background:#3b82f6; box-shadow:0 2px 0 #1e40af; }
+    .btn-solution  { background:#f59e0b; box-shadow:0 2px 0 #b45309; color:#000; }
+    .btn-menu      { background:#6b7280; box-shadow:0 2px 0 #374151; }
+    footer {
+      text-align:center;
+      padding:1.5rem;
+      font-size:0.75rem;
+      color:#6b7280;
+      border-top:1px solid rgba(34,197,94,0.15);
+      background:rgba(17,24,39,0.5);
+      backdrop-filter:blur(4px);
+    }
+    .footer-content {
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:0.5rem;
+    }
+    .email-link {
+      color:#22c55e;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      background:rgba(34,197,94,0.1);
+      padding:6px 12px;
+      border-radius:40px;
+    }
+    @media (max-width:700px) {
+      header { flex-direction:column; gap:10px; text-align:center; }
+      .container { padding:1rem; }
+      .card { padding:1.5rem; }
+      .score-board { flex-direction:column; gap:5px; text-align:center; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo-area">
+    <h2><i class="fas fa-code"></i> Instituto Federal Farroupilha - Campus Alegrete</h2>
+    <p>Professor Cristhiano Vasconcellos</p>
+  </div>
+  <div class="badge">
+    <i class="fas fa-chess"></i> Xadrez Interativo
+  </div>
+</header>
+
+<div class="container">
+  <div class="card">
+    <h1>♟️ Desafios de Xeque-Mate</h1>
+    <div class="score-board">
+      <span><i class="fas fa-trophy"></i> Pontuação: <span id="pontuacao">0</span></span>
+      <span><i class="fas fa-list-ol"></i> Desafio <span id="desafioAtual">1</span> / <span id="totalDesafios">10</span></span>
+    </div>
+    <div id="board"></div>
+    <div id="status">Clique em "Iniciar Desafios" para começar.</div>
+    <div id="botoes">
+      <button id="btnIniciar"><i class="fas fa-play"></i> Iniciar Desafios</button>
+      <button id="btnProximo" disabled><i class="fas fa-forward"></i> Próximo</button>
+      <button id="btnSolucao" disabled><i class="fas fa-lightbulb"></i> Ver Solução</button>
+      <button id="btnReiniciar"><i class="fas fa-undo-alt"></i> Reiniciar Jogo</button>
+      <button id="btnVoltar" class="btn-menu"><i class="fas fa-arrow-left"></i> Voltar ao Menu</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-content">
+    <span><i class="fas fa-graduation-cap"></i> Instituto Federal Farroupilha - Campus Alegrete | Programação I</span>
+    <a href="mailto:cristhiano.vasconcellos@iffarroupilha.edu.br" class="email-link">
+      <i class="fas fa-envelope"></i> cristhiano.vasconcellos@iffarroupilha.edu.br
+    </a>
+    <span>Desafios: dê xeque-mate em um movimento. Tente quantas vezes quiser.</span>
+  </div>
+</footer>
+
+<script>
+  // ====================== DESAFIOS ======================
+  // OBS: Mesmo que algum desafio esteja incorreto, o sistema agora valida automaticamente.
+
+  const desafios = [
+    { fen: "7k/8/6K1/8/8/8/5Q2/8 w - - 0 1", solucao: "Qg7#" },
+    { fen: "k7/2K5/8/8/8/8/8/R7 w - - 0 1", solucao: "Ra7#" },
+    { fen: "k7/3Q4/6K1/8/8/8/8/8 w - - 0 1", solucao: "Qa7#" },
+    { fen: "7k/8/5K2/8/8/8/8/1R6 w - - 0 1", solucao: "Rb8#" },
+    { fen: "7k/5K2/6Q1/8/8/8/8/8 w - - 0 1", solucao: "Qg7#" },
+    { fen: "7k/8/6K1/8/8/8/3Q4/8 w - - 0 1", solucao: "Qd8#" },
+    { fen: "7k/8/7K/8/8/8/8/R7 w - - 0 1", solucao: "Ra8#" },
+    { fen: "7k/8/6K1/4Q3/8/8/8/8 w - - 0 1", solucao: "Qe8#" },
+    { fen: "7k/8/6K1/8/8/2Q5/8/8 w - - 0 1", solucao: "Qc8#" },
+    { fen: "k7/8/1K6/8/8/8/8/2R5 w - - 0 1", solucao: "Rc8#" }
+  ];
+
+  let jogo = new Chess();
+  let board = null;
+  let modoDesafios = false;
+  let desafioIndex = 0;
+  let pontuacao = 0;
+  let desafioConcluido = false;
+  let fenAtual = "";
+
+  // ====================== VALIDADOR DE MATE EM 1 ======================
+  function validarMateEm1(fen) {
+    const teste = new Chess(fen);
+    const moves = teste.moves();
+
+    for (let m of moves) {
+      const copia = new Chess(fen);
+      copia.move(m);
+      if (copia.in_checkmate()) return true;
+    }
+    return false;
+  }
+
+  // ====================== DIAGNÓSTICO (DEBUG) ======================
+  function diagnosticar(fen) {
+    const teste = new Chess(fen);
+    const moves = teste.moves();
+    let mates = [];
+
+    for (let m of moves) {
+      const copia = new Chess(fen);
+      copia.move(m);
+      if (copia.in_checkmate()) mates.push(m);
+    }
+
+    return mates;
+  }
+
+  function atualizarPontuacao() {
+    document.getElementById('pontuacao').innerText = pontuacao;
+  }
+
+  function carregarDesafio(index) {
+  if (index >= desafios.length) {
+    finalizarJogo();
+    return;
+  }
+
+  let desafio = desafios[index];
+  let teste = new Chess(desafio.fen);
+
+  // 🔍 Verifica se existe mate em 1 REAL
+  let moves = teste.moves({ verbose: true });
+  let temMate = false;
+
+  for (let m of moves) {
+    let copia = new Chess(desafio.fen);
+    copia.move(m);
+    if (copia.in_checkmate()) {
+      temMate = true;
+      break;
+    }
+  }
+
+  // ❌ Se não tem mate, pula automaticamente
+  if (!temMate) {
+    console.warn("Desafio inválido (sem mate em 1):", desafio.fen);
+
+    document.getElementById('status').innerHTML =
+      "⚠️ Desafio inválido. Pulando automaticamente...";
+
+    setTimeout(() => {
+      desafioIndex++;
+      carregarDesafio(desafioIndex);
+    }, 1000);
+
+    return;
+  }
+
+  // ✅ Carrega desafio válido
+  fenAtual = desafio.fen;
+  jogo.load(fenAtual);
+  board.position(fenAtual);
+
+  desafioConcluido = false;
+
+  document.getElementById('status').innerHTML =
+    `Desafio ${index + 1}: Dê xeque-mate em 1!`;
+
+  document.getElementById('btnProximo').disabled = true;
+  document.getElementById('btnSolucao').disabled = false;
+  document.getElementById('desafioAtual').innerText = index + 1;
+}
+
+  function onDrop(source, target) {
+    if (!modoDesafios) return 'snapback';
+    if (desafioConcluido) return 'snapback';
+
+    let move = jogo.move({
+      from: source,
+      to: target,
+      promotion: 'q'
+    });
+
+    if (move === null) return 'snapback';
+
+    board.position(jogo.fen());
+
+    if (jogo.in_checkmate()) {
+      desafioConcluido = true;
+      pontuacao++;
+      atualizarPontuacao();
+
+      document.getElementById('status').innerHTML =
+        '✅ Correto! Xeque-mate! +1 ponto';
+
+      document.getElementById('btnProximo').disabled = false;
+      document.getElementById('btnSolucao').disabled = true;
+
+    } else {
+      jogo.load(fenAtual);
+      board.position(fenAtual);
+
+      document.getElementById('status').innerHTML =
+        '❌ Não é xeque-mate. Tente novamente.';
+    }
+  }
+
+  function mostrarSolucao() {
+    if (!modoDesafios || desafioConcluido) return;
+
+    const solucao = desafios[desafioIndex].solucao;
+
+    try {
+      const teste = new Chess(fenAtual);
+      const move = teste.move(solucao);
+
+      if (move && teste.in_checkmate()) {
+        jogo.load(fenAtual);
+        jogo.move(solucao);
+        board.position(jogo.fen());
+
+        desafioConcluido = true;
+
+        document.getElementById('status').innerHTML =
+          `💡 Solução: ${solucao}`;
+
+        document.getElementById('btnProximo').disabled = false;
+        document.getElementById('btnSolucao').disabled = true;
+      } else {
+        document.getElementById('status').innerHTML =
+          '⚠️ Solução inválida para este desafio.';
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  function proximoDesafio() {
+    if (!modoDesafios) return;
+
+    if (!desafioConcluido) {
+      document.getElementById('status').innerHTML =
+        '⚠️ Resolva ou veja a solução antes de avançar.';
+      return;
+    }
+
+    desafioIndex++;
+    carregarDesafio(desafioIndex);
+  }
+
+  function finalizarJogo() {
+    modoDesafios = false;
+
+    document.getElementById('status').innerHTML =
+      `🏆 Fim! Pontuação: ${pontuacao}/${desafios.length}`;
+
+    document.getElementById('btnProximo').disabled = true;
+    document.getElementById('btnSolucao').disabled = true;
+    document.getElementById('btnIniciar').disabled = false;
+  }
+
+  function iniciarDesafios() {
+    modoDesafios = true;
+    desafioIndex = 0;
+    pontuacao = 0;
+    atualizarPontuacao();
+
+    if (board) board.destroy();
+
+    board = Chessboard('board', {
+      draggable: true,
+      position: 'start',
+      pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png',
+      onDrop: onDrop
+    });
+
+    carregarDesafio(0);
+
+    document.getElementById('btnIniciar').disabled = true;
+  }
+
+  function reiniciarJogo() {
+    if (modoDesafios) {
+      iniciarDesafios();
+    } else {
+      jogo.reset();
+      board.position(jogo.fen());
+    }
+  }
+
+  function voltarMenu() {
+    window.location.href = 'index.html';
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    board = Chessboard('board', {
+      draggable: true,
+      position: 'start',
+      pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png',
+      onDrop: function (source, target) {
+        if (modoDesafios) return 'snapback';
+
+        let move = jogo.move({ from: source, to: target, promotion: 'q' });
+        if (move === null) return 'snapback';
+
+        board.position(jogo.fen());
+
+        if (jogo.in_checkmate()) {
+          document.getElementById('status').innerHTML = 'Xeque-mate!';
+        }
+      }
+    });
+
+    document.getElementById('totalDesafios').innerText = desafios.length;
+
+    document.getElementById('btnIniciar').addEventListener('click', iniciarDesafios);
+    document.getElementById('btnProximo').addEventListener('click', proximoDesafio);
+    document.getElementById('btnSolucao').addEventListener('click', mostrarSolucao);
+    document.getElementById('btnReiniciar').addEventListener('click', reiniciarJogo);
+    document.getElementById('btnVoltar').addEventListener('click', voltarMenu);
+
+    document.getElementById('status').innerHTML =
+      'Clique em "Iniciar Desafios" para começar.';
+  });
+</script>
+</body>
+</html>
