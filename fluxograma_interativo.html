@@ -226,13 +226,12 @@ const questoesBase = [
   },
   { // 5 - Laço enquanto (contagem)
     diagrama: `graph TD
-      A[Início] --> B[x recebe 1]
-      B --> C{x menor ou igual a 5}
+      A[Inicio] --> B[x recebe 1]
+      B --> C{x menor ou igual a 5?}
       C -->|Sim| D[Escreva x]
       D --> E[x recebe x mais 1]
       E --> C
-      C -->|Não| 
-      F[Fim]`,
+      C -->|Nao| F[Fim]`,
     codigos: [
       "algoritmo \"Contagem\"\nvar\n   x: inteiro\ninicio\n   x <- 1\n   enquanto x <= 5 faca\n      escreva(x)\n      x <- x + 1\n   fimenquanto\nfimalgoritmo",
       "algoritmo \"Contagem\"\nvar\n   x: inteiro\ninicio\n   x <- 1\n   repita\n      escreva(x)\n      x <- x + 1\n   ate x = 5\nfimalgoritmo"
